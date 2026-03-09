@@ -56,13 +56,18 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 /* ── TABS ── */
 .tabs{
   display:flex;
-  overflow-x:auto;
+  flex-wrap:nowrap;
+  overflow-x:scroll !important;
+  -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
+  -ms-overflow-style:none;
   border-bottom:1px solid var(--border);
   flex-shrink:0;
   position:sticky;top:57px;background:var(--bg);z-index:99;
+  width:100%;
+  min-width:0;
 }
-.tabs::-webkit-scrollbar{display:none}
+.tabs::-webkit-scrollbar{display:none !important;height:0 !important}
 .tab-btn{
   flex-shrink:0;
   padding:11px 15px;
