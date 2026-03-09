@@ -56,26 +56,21 @@ body{display:flex;flex-direction:column;max-width:480px;margin:0 auto;min-height
 /* ── TABS ── */
 .tabs{
   display:flex;
-  flex-wrap:nowrap;
-  overflow-x:scroll !important;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-  -ms-overflow-style:none;
+  flex-wrap:wrap;
   border-bottom:1px solid var(--border);
   flex-shrink:0;
   position:sticky;top:57px;background:var(--bg);z-index:99;
   width:100%;
-  min-width:0;
 }
-.tabs::-webkit-scrollbar{display:none !important;height:0 !important}
 .tab-btn{
-  flex-shrink:0;
-  padding:11px 15px;
-  font-family:var(--sans);font-size:11px;font-weight:700;
-  letter-spacing:0.6px;text-transform:uppercase;
+  flex:1 0 auto;
+  padding:9px 10px;
+  font-family:var(--sans);font-size:10px;font-weight:700;
+  letter-spacing:0.4px;text-transform:uppercase;
   color:var(--muted);background:none;border:none;
   border-bottom:2px solid transparent;
   cursor:pointer;transition:all 0.2s;white-space:nowrap;
+  text-align:center;
 }
 .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 
@@ -573,9 +568,17 @@ tbody tr:hover td{background:rgba(255,255,255,0.015)}
     <button class="load-btn" onclick="fetchSheetData()">↻ Cargar desde Sheets</button>
   </div>
   <div class="kpi-strip" id="eKpis"></div>
+  <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+    <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex-shrink:0">Agrupar</div>
+    <select class="filter-select" id="eAgrupar" onchange="renderEgresos()" style="flex:1">
+      <option value="ninguno">Sin agrupar</option>
+      <option value="mes">Por mes</option>
+      <option value="anio">Por año</option>
+    </select>
+  </div>
   <div class="table-wrap" id="eTableWrap" style="display:none">
     <table>
-      <thead><tr><th>EN</th><th>Moneda</th><th>Monto</th><th>CON</th></tr></thead>
+      <thead><tr><th>Fecha</th><th>EN</th><th>Moneda</th><th>Monto</th><th>CON</th></tr></thead>
       <tbody id="eTableBody"></tbody>
     </table>
   </div>
@@ -626,9 +629,17 @@ tbody tr:hover td{background:rgba(255,255,255,0.015)}
     </div>
   </div>
   <div class="kpi-strip" id="iKpis"></div>
+  <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+    <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex-shrink:0">Agrupar</div>
+    <select class="filter-select" id="iAgrupar" onchange="renderIngresos()" style="flex:1">
+      <option value="ninguno">Sin agrupar</option>
+      <option value="mes">Por mes</option>
+      <option value="anio">Por año</option>
+    </select>
+  </div>
   <div class="table-wrap" id="iTableWrap" style="display:none">
     <table>
-      <thead><tr><th>CON</th><th>Moneda</th><th>Monto</th><th>EN</th></tr></thead>
+      <thead><tr><th>Fecha</th><th>CON</th><th>Moneda</th><th>Monto</th><th>EN</th></tr></thead>
       <tbody id="iTableBody"></tbody>
     </table>
   </div>
@@ -847,7 +858,11 @@ async function fetchSheetData() {
       try {
         const sd = await saldosRes.json();
         (sd.rows || []).forEach(r => {
-          saldosIniciales[norm(r.cuenta) + '|||' + (r.moneda||'ARS')] = parseFloat(r.saldo_inicial) || 0;
+          // Acepta campo 'saldo_inicial' o 'saldo' (por compatibilidad con el script.gs)
+          const si = parseFloat(r.saldo_inicial ?? r.saldo) || 0;
+          if (r.cuenta) {
+            saldosIniciales[norm(String(r.cuenta)) + '|||' + String(r.moneda||'ARS')] = si;
+          }
         });
       } catch(e) {}
     }
@@ -1009,6 +1024,9 @@ function renderHistorial() {
     const cls  = tipo === 'INGRESO' ? 'hist-ingreso' : tipo === 'BALANCE' ? 'hist-balance' : 'hist-egreso';
     const amtCls = tipo === 'INGRESO' ? 'amt-green' : tipo === 'BALANCE' ? 'amt-blue' : 'amt-red';
     const uid = `hedit-${idx}`;
+    const desc = String(r.descripcion||'').replace(/"/g,'&quot;');
+    const med  = String(r.medio_pago||'').replace(/"/g,'&quot;');
+    const com  = String(r.comentario||'').replace(/"/g,'&quot;');
     return `
     <div class="hist-item ${cls}">
       <div class="hist-main" onclick="toggleHistEdit('${uid}')">
@@ -1022,15 +1040,15 @@ function renderHistorial() {
         </div>
       </div>
       <div class="hist-edit-panel" id="${uid}">
-        <div class="edit-field"><div class="edit-field-label">EN (destino)</div><input id="${uid}-desc" value="${(r.descripcion||'').replace(/"/g,'&quot;')}"></div>
-        <div class="edit-field"><div class="edit-field-label">CON (origen)</div><input id="${uid}-med" value="${(r.medio_pago||'').replace(/"/g,'&quot;')}"></div>
+        <div class="edit-field"><div class="edit-field-label">EN (destino)</div><input id="${uid}-desc" value="${desc}"></div>
+        <div class="edit-field"><div class="edit-field-label">CON (origen)</div><input id="${uid}-med" value="${med}"></div>
         <div class="edit-field"><div class="edit-field-label">Monto</div><input type="number" id="${uid}-monto" value="${r.monto||0}"></div>
-        <div class="edit-field"><div class="edit-field-label">Moneda</div><input id="${uid}-moneda" value="${r.moneda||'ARS'}"></div>
-        <div class="edit-field"><div class="edit-field-label">Fecha</div><input id="${uid}-fecha" value="${r.fecha||''}"></div>
+        <div class="edit-field"><div class="edit-field-label">Moneda</div><input id="${uid}-moneda" value="${String(r.moneda||'ARS')}"></div>
+        <div class="edit-field"><div class="edit-field-label">Fecha</div><input id="${uid}-fecha" value="${String(r.fecha||'')}"></div>
         <div class="edit-field"><div class="edit-field-label">Categoría</div>
           <select id="${uid}-cat">${CATS.map(c=>`<option value="${c}" ${c===r.categoria?'selected':''}>${c}</option>`).join('')}</select>
         </div>
-        <div class="edit-field"><div class="edit-field-label">Comentario</div><input id="${uid}-com" value="${(r.comentario||'').replace(/"/g,'&quot;')}"></div>
+        <div class="edit-field"><div class="edit-field-label">Comentario</div><input id="${uid}-com" value="${com}"></div>
         <div class="edit-actions">
           <button class="edit-save" onclick="saveHistEdit('${uid}',${idx})">Guardar cambios</button>
           <button class="edit-cancel" onclick="toggleHistEdit('${uid}')">Cancelar</button>
@@ -1106,13 +1124,42 @@ function renderEgresos() {
   if (!rows.length) { wrap.style.display='none'; empty.style.display='block'; return; }
 
   wrap.style.display='block'; empty.style.display='none';
-  document.getElementById('eTableBody').innerHTML = rows.slice().reverse().map(r => `
-    <tr>
-      <td><div class="cell-main">${r.descripcion||'—'}</div><div class="cell-sub">${r.categoria||''}</div></td>
-      <td class="amt-muted">${r.moneda||'ARS'}</td>
-      <td class="amt amt-red">$${num(r.monto)}</td>
-      <td><div class="cell-sub">${r.medio_pago||'—'}</div></td>
-    </tr>`).join('');
+  const eAgrupar = document.getElementById('eAgrupar')?.value || 'ninguno';
+
+  if (eAgrupar === 'ninguno') {
+    document.getElementById('eTableBody').innerHTML = rows.slice().reverse().map(r => `
+      <tr>
+        <td class="amt-muted" style="white-space:nowrap">${r.fecha||''}</td>
+        <td><div class="cell-main">${r.descripcion||'—'}</div><div class="cell-sub">${r.categoria||''}</div></td>
+        <td class="amt-muted">${r.moneda||'ARS'}</td>
+        <td class="amt amt-red">$${num(r.monto)}</td>
+        <td><div class="cell-sub">${r.medio_pago||'—'}</div></td>
+      </tr>`).join('');
+  } else {
+    // Agrupar por mes o año
+    const getKey = r => {
+      const d = parseDate(r.fecha);
+      if (!d) return 'Sin fecha';
+      return eAgrupar === 'mes'
+        ? `${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`
+        : `${d.getFullYear()}`;
+    };
+    const grupos = {};
+    rows.forEach(r => {
+      const k = getKey(r) + '|||' + (r.moneda||'ARS');
+      if (!grupos[k]) grupos[k] = { label: getKey(r), moneda: r.moneda||'ARS', total:0, count:0 };
+      grupos[k].total += r.monto||0;
+      grupos[k].count++;
+    });
+    const sorted = Object.values(grupos).sort((a,b) => b.label.localeCompare(a.label));
+    document.getElementById('eTableBody').innerHTML = sorted.map(g => `
+      <tr>
+        <td colspan="2"><div class="cell-main">${g.label}</div></td>
+        <td class="amt-muted">${g.moneda}</td>
+        <td class="amt amt-red">$${num(g.total)}</td>
+        <td class="amt-muted">${g.count} txs</td>
+      </tr>`).join('');
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -1144,13 +1191,41 @@ function renderIngresos() {
   if (!rows.length) { wrap.style.display='none'; empty.style.display='block'; return; }
 
   wrap.style.display='block'; empty.style.display='none';
-  document.getElementById('iTableBody').innerHTML = rows.slice().reverse().map(r => `
-    <tr>
-      <td><div class="cell-main">${r.medio_pago||'—'}</div></td>
-      <td class="amt-muted">${r.moneda||'ARS'}</td>
-      <td class="amt amt-green">$${num(r.monto)}</td>
-      <td><div class="cell-sub">${r.descripcion||'—'}</div></td>
-    </tr>`).join('');
+  const iAgrupar = document.getElementById('iAgrupar')?.value || 'ninguno';
+
+  if (iAgrupar === 'ninguno') {
+    document.getElementById('iTableBody').innerHTML = rows.slice().reverse().map(r => `
+      <tr>
+        <td class="amt-muted" style="white-space:nowrap">${r.fecha||''}</td>
+        <td><div class="cell-main">${r.medio_pago||'—'}</div></td>
+        <td class="amt-muted">${r.moneda||'ARS'}</td>
+        <td class="amt amt-green">$${num(r.monto)}</td>
+        <td><div class="cell-sub">${r.descripcion||'—'}</div></td>
+      </tr>`).join('');
+  } else {
+    const getKey = r => {
+      const d = parseDate(r.fecha);
+      if (!d) return 'Sin fecha';
+      return iAgrupar === 'mes'
+        ? `${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`
+        : `${d.getFullYear()}`;
+    };
+    const grupos = {};
+    rows.forEach(r => {
+      const k = getKey(r) + '|||' + (r.moneda||'ARS');
+      if (!grupos[k]) grupos[k] = { label: getKey(r), moneda: r.moneda||'ARS', total:0, count:0 };
+      grupos[k].total += r.monto||0;
+      grupos[k].count++;
+    });
+    const sorted = Object.values(grupos).sort((a,b) => b.label.localeCompare(a.label));
+    document.getElementById('iTableBody').innerHTML = sorted.map(g => `
+      <tr>
+        <td colspan="2"><div class="cell-main">${g.label}</div></td>
+        <td class="amt-muted">${g.moneda}</td>
+        <td class="amt amt-green">$${num(g.total)}</td>
+        <td class="amt-muted">${g.count} txs</td>
+      </tr>`).join('');
+  }
 }
 
 // ══════════════════════════════════════════════
