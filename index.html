@@ -76,18 +76,20 @@ a{color:inherit;text-decoration:none}
    TAB NAV — scrollable horizontal
 ═══════════════════════════════════════════ */
 .tabnav{
-  display:flex;overflow-x:auto;gap:2px;
+  display:flex;overflow-x:auto;gap:4px;
   padding:8px 12px;background:var(--bg);
   border-bottom:1px solid var(--border);
   scrollbar-width:none;position:sticky;top:57px;z-index:99;
+  -webkit-overflow-scrolling:touch;
 }
 .tabnav::-webkit-scrollbar{display:none}
 .tab{
-  flex:0 0 auto;padding:7px 14px;border-radius:20px;
-  font-size:13px;font-weight:500;white-space:nowrap;
+  flex:0 0 auto;padding:7px 13px;border-radius:20px;
+  font-size:12px;font-weight:500;white-space:nowrap;
   background:transparent;color:var(--muted);
   border:1px solid transparent;
   transition:all .15s;
+  -webkit-tap-highlight-color:transparent;
 }
 .tab.active{
   background:var(--card);color:var(--text);
@@ -315,6 +317,7 @@ select.form-control option{background:var(--card)}
     <div class="topbar-logo">Flow<span>Track</span></div>
     <div class="topbar-actions">
       <button class="currency-toggle active" id="btnMoneda" onclick="toggleMoneda()">USD</button>
+      <button class="btn-icon" id="btnSync" onclick="syncSheet()" title="Sincronizar Sheet">↻</button>
       <button class="btn-icon" onclick="showTab('config')" title="Configuración">⚙️</button>
     </div>
   </div>
@@ -809,6 +812,13 @@ function showTab(id){
 // ═══════════════════════════════════════════
 // CARGAR SHEET
 // ═══════════════════════════════════════════
+async function syncSheet(){
+  const btn = document.getElementById('btnSync');
+  btn.style.animation = 'spin .7s linear infinite';
+  await cargarSheet();
+  btn.style.animation = '';
+}
+
 async function cargarSheet(){
   const url = config.scriptUrl || localStorage.getItem('ft_script_url');
   if(!url){ showToast('Configurá la URL del Script ⚙️'); return; }
