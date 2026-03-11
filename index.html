@@ -304,6 +304,10 @@ select.form-control option{background:var(--card)}
 .badge-muted{background:var(--card2);color:var(--muted)}
 
 .empty{text-align:center;padding:32px 16px;color:var(--muted);font-size:13px}
+.sortable{cursor:pointer;user-select:none}
+.sortable:hover{color:var(--text)}
+.sort-icon{margin-left:3px;font-size:9px;opacity:.6}
+.sort-icon.active{opacity:1;color:var(--accent)}
 .divider{height:1px;background:var(--border);margin:12px 0}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -631,7 +635,7 @@ select.form-control option{background:var(--card)}
 const CUENTAS_SEGURIDAD = ['santander','mp','bbva','hipotecario','calfpay','efectivo'];
 const CUENTAS_CRECIMIENTO = ['buenbit','binance','lemon','iol'];
 const CUENTAS_PASIVO = ['visa santander','amex santander','amex pae'];
-const CUENTAS_NEGOCIO = ['flores','vision bi','emi','mama','entradas arg-bra','sillas living','valvula inodoro','venta cruze','medico'];
+const CUENTAS_NEGOCIO = ['flores','vision bi','emi','mama','entradas arg-bra','venta cruze'];
 
 const TIPOS_INGRESO = ['Sueldo','Renta','Rendimiento','Devolución','Liquidación','Ingreso Negocio'];
 
@@ -648,6 +652,7 @@ const NOMBRES_MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oc
 // ESTADO GLOBAL
 // ═══════════════════════════════════════════
 let allRows = [];
+let sortState = {}; // { tablaId: { col, dir } }
 let saldosIniciales = [];
 let monedaBase = 'USD'; // o 'ARS'
 let tasas = {};
@@ -711,6 +716,39 @@ function guardarMetas(){
 // ═══════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════
+// ─── SORT ───
+function sortRows(rows, col, dir){
+  return [...rows].sort((a,b)=>{
+    let va, vb;
+    if(col==='fecha'){
+      const fa=partesFecha(a), fb=partesFecha(b);
+      va=(fa.y||0)*10000+(fa.m||0)*100+(fa.d||0);
+      vb=(fb.y||0)*10000+(fb.m||0)*100+(fb.d||0);
+    } else if(col==='monto'){
+      va=parseFloat(a.monto)||0; vb=parseFloat(b.monto)||0;
+    } else {
+      va=str(a.descripcion).toLowerCase(); vb=str(b.descripcion).toLowerCase();
+    }
+    if(va<vb) return dir==='asc'?-1:1;
+    if(va>vb) return dir==='asc'?1:-1;
+    return 0;
+  });
+}
+
+function getSortDir(id, col){
+  const s=sortState[id];
+  if(!s||s.col!==col) return 'desc';
+  return s.dir==='desc'?'asc':'desc';
+}
+
+function setSortState(id, col, dir){ sortState[id]={col,dir}; }
+
+function sortIcon(id, col){
+  const s=sortState[id];
+  if(!s||s.col!==col) return '<span class="sort-icon">⇅</span>';
+  return `<span class="sort-icon active">${s.dir==='asc'?'↑':'↓'}</span>`;
+}
+
 function str(v){ return String(v||'').trim(); }
 function esc(s){ const d=document.createElement('div'); d.textContent=str(s); return d.innerHTML; }
 function norm(s){ return str(s).toLowerCase(); }
@@ -992,6 +1030,7 @@ function renderIngresos(){
   // Filtrar: tipo es ingreso real
   const ingresos = rows.filter(r=>TIPOS_INGRESO.includes(str(r.tipo)));
 
+  window._ingRows = ingresos;
   document.getElementById('ing-count').textContent = ingresos.length;
 
   // Total en ARS (son casi todos ARS)
@@ -1023,9 +1062,19 @@ function renderIngresos(){
 
   // Tabla detalle
   const sorted=[...ingresos].sort((a,b)=>{ const fa=partesFecha(a),fb=partesFecha(b); return (fb.y-fa.y)||(fb.m-fa.m)||(fb.d-fa.d);});
+  renderTablaIngresos(ingresos, sortState['ing']?.col||'fecha', sortState['ing']?.dir||'desc');
+}
+
+function renderTablaIngresos(ingresos, col='fecha', dir='desc'){
+  const sorted = sortRows(ingresos, col, dir);
   document.getElementById('ing-tabla-wrap').innerHTML = sorted.length
     ? `<div class="tbl-wrap"><table>
-        <thead><tr><th>Fecha</th><th>Descripción</th><th>Tipo</th><th>Monto</th></tr></thead>
+        <thead><tr>
+          <th class="sortable" onclick="setSortState('ing','fecha',getSortDir('ing','fecha'));renderTablaIngresos(window._ingRows||[])">Fecha${sortIcon('ing','fecha')}</th>
+          <th class="sortable" onclick="setSortState('ing','desc',getSortDir('ing','desc'));renderTablaIngresos(window._ingRows||[])">Descripción${sortIcon('ing','desc')}</th>
+          <th>Tipo</th>
+          <th class="sortable" onclick="setSortState('ing','monto',getSortDir('ing','monto'));renderTablaIngresos(window._ingRows||[])">Monto${sortIcon('ing','monto')}</th>
+        </tr></thead>
         <tbody>${sorted.map(r=>`<tr>
           <td class="td-mono td-muted">${esc(fmtFecha(r))}</td>
           <td>${esc(str(r.descripcion))}</td>
@@ -1084,9 +1133,20 @@ function renderEgresos(){
 
   // Lista
   const sorted=[...egresos].sort((a,b)=>{ const fa=partesFecha(a),fb=partesFecha(b); return (fb.y-fa.y)||(fb.m-fa.m)||(fb.d-fa.d);});
+  window._egRows = egresos;
+  renderTablaEgresos(egresos, sortState['eg']?.col||'fecha', sortState['eg']?.dir||'desc');
+}
+
+function renderTablaEgresos(egresos, col='fecha', dir='desc'){
+  const sorted = sortRows(egresos, col, dir);
   document.getElementById('eg-lista-view').innerHTML=sorted.length
     ? `<div class="tbl-wrap"><table>
-        <thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Monto</th></tr></thead>
+        <thead><tr>
+          <th class="sortable" onclick="setSortState('eg','fecha',getSortDir('eg','fecha'));renderTablaEgresos(window._egRows||[])">Fecha${sortIcon('eg','fecha')}</th>
+          <th class="sortable" onclick="setSortState('eg','desc',getSortDir('eg','desc'));renderTablaEgresos(window._egRows||[])">Descripción${sortIcon('eg','desc')}</th>
+          <th>Categoría</th>
+          <th class="sortable" onclick="setSortState('eg','monto',getSortDir('eg','monto'));renderTablaEgresos(window._egRows||[])">Monto${sortIcon('eg','monto')}</th>
+        </tr></thead>
         <tbody>${sorted.map(r=>`<tr>
           <td class="td-mono td-muted">${esc(fmtFecha(r))}</td>
           <td>${esc(str(r.descripcion))}</td>
@@ -1112,15 +1172,15 @@ function renderNegocios(){
     const monto=parseFloat(r.monto)||0;
     const mon=str(r.moneda)||'ARS';
 
-    // Negocio en CON → ingresa plata al negocio (egreso desde fuera)
-    if(negocios[con]){
-      negocios[con].egresos+=toUSD(monto,mon);
-      negocios[con].monedas.add(mon);
-    }
-    // Negocio en EN → sale plata del negocio (ingreso al negocio)
+    // Negocio en EN → cobro/ingreso del negocio a tu cuenta
     if(negocios[en]){
       negocios[en].ingresos+=toUSD(monto,mon);
       negocios[en].monedas.add(mon);
+    }
+    // Negocio en CON → inversión/gasto que sale de tu cuenta hacia el negocio
+    if(negocios[con]){
+      negocios[con].egresos+=toUSD(monto,mon);
+      negocios[con].monedas.add(mon);
     }
   });
 
@@ -1188,10 +1248,22 @@ function renderHistorial(){
   document.getElementById('h-suma').textContent='$'+suma.toLocaleString('es-AR',{maximumFractionDigits:0});
 
   const sorted=[...rows].sort((a,b)=>{const fa=partesFecha(a),fb=partesFecha(b);return(fb.y-fa.y)||(fb.m-fa.m)||(fb.d-fa.d);});
-  document.getElementById('h-tabla').innerHTML=sorted.length
+  window._hRows = sorted;
+  renderTablaHistorial(sorted, sortState['h']?.col||'fecha', sortState['h']?.dir||'desc');
+}
+
+function renderTablaHistorial(rows, col='fecha', dir='desc'){
+  const sorted2 = sortRows(rows, col, dir);
+  document.getElementById('h-tabla').innerHTML=sorted2.length
     ? `<table>
-        <thead><tr><th>Fecha</th><th>Monto</th><th>Mon</th><th>En</th><th>Con</th><th>Tipo</th><th>Cat</th></tr></thead>
-        <tbody>${sorted.map(r=>`<tr>
+        <thead><tr>
+          <th class="sortable" onclick="setSortState('h','fecha',getSortDir('h','fecha'));renderTablaHistorial(window._hRows||[])">Fecha${sortIcon('h','fecha')}</th>
+          <th class="sortable" onclick="setSortState('h','monto',getSortDir('h','monto'));renderTablaHistorial(window._hRows||[])">Monto${sortIcon('h','monto')}</th>
+          <th>Mon</th>
+          <th class="sortable" onclick="setSortState('h','desc',getSortDir('h','desc'));renderTablaHistorial(window._hRows||[])">En${sortIcon('h','desc')}</th>
+          <th>Con</th><th>Tipo</th><th>Cat</th>
+        </tr></thead>
+        <tbody>${sorted2.map(r=>`<tr>
           <td class="td-mono td-muted" style="white-space:nowrap">${esc(fmtFecha(r))}</td>
           <td class="td-mono">${esc(fmtMonto(parseFloat(r.monto)||0))}</td>
           <td class="td-muted">${esc(str(r.moneda))}</td>
