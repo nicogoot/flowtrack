@@ -634,7 +634,7 @@ select.form-control option{background:var(--card)}
 
 const CUENTAS_SEGURIDAD = ['santander','mp','bbva','hipotecario','calfpay','efectivo'];
 const CUENTAS_CRECIMIENTO = ['buenbit','binance','lemon','iol'];
-const CUENTAS_PASIVO = ['visa santander','amex santander','amex pae'];
+const CUENTAS_PASIVO = ['visa santander','amex santander'];
 const CUENTAS_NEGOCIO = ['flores','vision bi','emi','mama','entradas arg-bra','venta cruze'];
 
 const TIPOS_INGRESO = ['Sueldo','Renta','Rendimiento','Devolución','Liquidación','Ingreso Negocio'];
@@ -920,41 +920,48 @@ function filtrarPorPeriodo(rows, preId){
 // CORE — SALDOS POR CUENTA+MONEDA
 // ═══════════════════════════════════════════
 function calcSaldosCuentas(){
-  // Agrupa: { 'santander|ARS': saldo, ... }
   const saldos = {};
 
-  // Saldos iniciales
+  // ── Saldos iniciales (solo cuentas balance) ──
   saldosIniciales.forEach(si=>{
     const key = norm(si.cuenta)+'|'+str(si.moneda).toUpperCase();
     saldos[key] = (saldos[key]||0) + (parseFloat(si.saldo)||0);
   });
 
-  // Sumar EN y restar CON para Balance Bancario/Exchange
   allRows.forEach(r=>{
     const en    = norm(str(r.descripcion));
     const con   = norm(str(r.medio_pago));
     const monto = parseFloat(r.monto)||0;
     const mon   = str(r.moneda).toUpperCase();
 
-    const enKey  = en+'|'+mon;
-    const conKey = con+'|'+mon;
-
-    // Si EN es cuenta balance → suma
+    // ── Cuentas Seguridad y Crecimiento: EN suma, CON resta ──
     if(CUENTAS_SEGURIDAD.includes(en)||CUENTAS_CRECIMIENTO.includes(en)){
-      saldos[enKey] = (saldos[enKey]||0) + monto;
+      saldos[en+'|'+mon] = (saldos[en+'|'+mon]||0) + monto;
     }
-    // Si CON es cuenta balance → resta
     if(CUENTAS_SEGURIDAD.includes(con)||CUENTAS_CRECIMIENTO.includes(con)){
-      saldos[conKey] = (saldos[conKey]||0) - monto;
+      saldos[con+'|'+mon] = (saldos[con+'|'+mon]||0) - monto;
     }
-    // Pasivos: CON pasivo → suma deuda (positivo = deuda)
+
+    // ── Pasivos: CON tarjeta = gasto acumula deuda ──
     if(CUENTAS_PASIVO.includes(con)){
-      saldos[conKey] = (saldos[conKey]||0) + monto;
+      saldos[con+'|'+mon] = (saldos[con+'|'+mon]||0) + monto;
     }
-    // Pasivos: EN es pago de pasivo → resta deuda
-    const en_raw = norm(str(r.descripcion));
-    if(en_raw==='pago visa santander') saldos['visa santander|ARS'] = (saldos['visa santander|ARS']||0) - monto;
-    if(en_raw==='pago amex' || en_raw==='pago amex santander') saldos['amex santander|ARS'] = (saldos['amex santander|ARS']||0) - monto;
+
+    // ── Pasivos: EN = pago de tarjeta, cancela deuda ──
+    // Mapeo flexible: cualquier variante de "pago X" resta de la tarjeta correspondiente
+    if(en==='pago visa santander'){
+      saldos['visa santander|ARS'] = (saldos['visa santander|ARS']||0) - monto;
+    }
+    if(en==='pago amex' || en==='pago amex santander'){
+      saldos['amex santander|ARS'] = (saldos['amex santander|ARS']||0) - monto;
+    }
+    // pago master: tarjeta BBVA ya cancelada, se ignora
+  });
+
+  // ── Garantizar que pasivos no queden negativos (deuda no puede ser negativa) ──
+  CUENTAS_PASIVO.forEach(p=>{
+    const key = p+'|ARS';
+    if(saldos[key] && saldos[key] < 0) saldos[key] = 0;
   });
 
   return saldos;
