@@ -634,7 +634,7 @@ select.form-control option{background:var(--card)}
 
 const CUENTAS_SEGURIDAD = ['santander','mp','bbva','hipotecario','calfpay','efectivo'];
 const CUENTAS_CRECIMIENTO = ['buenbit','binance','lemon','iol'];
-const CUENTAS_PASIVO = ['visa santander','amex santander','amex pae'];
+const CUENTAS_PASIVO = ['visa santander','amex santander'];
 const CUENTAS_NEGOCIO = ['flores','vision bi','emi','mama','entradas arg-bra','venta cruze'];
 
 const TIPOS_INGRESO = ['Sueldo','Renta','Rendimiento','Devolución','Liquidación','Ingreso Negocio'];
@@ -947,14 +947,22 @@ function calcSaldosCuentas(){
     if(CUENTAS_SEGURIDAD.includes(con)||CUENTAS_CRECIMIENTO.includes(con)){
       saldos[conKey] = (saldos[conKey]||0) - monto;
     }
-    // Pasivos: CON pasivo → suma deuda (positivo = deuda)
+    // Pasivos: CON tarjeta → acumula gasto (deuda)
     if(CUENTAS_PASIVO.includes(con)){
-      saldos[conKey] = (saldos[conKey]||0) + monto;
+      saldos[con+'|ARS'] = (saldos[con+'|ARS']||0) + monto;
     }
-    // Pasivos: EN es pago de pasivo → resta deuda
-    const en_raw = norm(str(r.descripcion));
-    if(en_raw==='pago visa santander') saldos['visa santander|ARS'] = (saldos['visa santander|ARS']||0) - monto;
-    if(en_raw==='pago amex' || en_raw==='pago amex santander') saldos['amex santander|ARS'] = (saldos['amex santander|ARS']||0) - monto;
+    // Pasivos: EN pago de tarjeta → cancela deuda
+    if(en==='pago visa santander'){
+      saldos['visa santander|ARS'] = (saldos['visa santander|ARS']||0) - monto;
+    }
+    if(en==='pago amex' || en==='pago amex santander' || en==='pago amex pae'){
+      saldos['amex santander|ARS'] = (saldos['amex santander|ARS']||0) - monto;
+    }
+    // Garantizar que pasivo no quede negativo (pagaste de más → deuda = 0)
+    CUENTAS_PASIVO.forEach(p=>{
+      const k=p+'|ARS';
+      if((saldos[k]||0) < 0) saldos[k]=0;
+    });
   });
 
   return saldos;
