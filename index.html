@@ -494,23 +494,18 @@ select.form-control option{background:var(--card)}
           <label class="form-label">Categoría</label>
           <select class="form-control" id="f-categoria">
             <option value="">Sin categoría</option>
-            <option>Vivienda & Hogar</option><option>Alimentación & Salidas</option>
-            <option>Transporte & Vehículo</option><option>Salud & Bienestar</option>
-            <option>Tech & Suscripciones</option><option>Viajes & Ocio</option>
-            <option>Evangelista</option><option>Finanzas & Obligaciones</option>
-            <option>Compras Personales & Regalos</option><option>Mascotas</option>
-            <option>Varios / A Clasificar</option><option>Activos Adquiridos</option>
-            <option>Portfolio / Inversiones</option>
           </select>
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">En (descripción)</label>
-        <input type="text" class="form-control" id="f-en">
+        <label class="form-label">En (descripción) — destino del dinero</label>
+        <input type="text" class="form-control" id="f-en" list="list-en" autocomplete="off" placeholder="¿adónde fue el dinero?">
+        <datalist id="list-en"></datalist>
       </div>
       <div class="form-group">
-        <label class="form-label">Con (medio de pago)</label>
-        <input type="text" class="form-control" id="f-con">
+        <label class="form-label">Con (medio de pago) — origen del dinero</label>
+        <input type="text" class="form-control" id="f-con" list="list-con" autocomplete="off" placeholder="¿de dónde vino?">
+        <datalist id="list-con"></datalist>
       </div>
       <div class="form-group">
         <label class="form-label">Comentario</label>
@@ -658,6 +653,11 @@ let monedaBase = 'USD'; // o 'ARS'
 let tasas = {};
 let config = {};
 let metas = {};
+
+// PASO 3 — Tablas de referencia (cargadas del Sheet)
+let tablasCuentas    = []; // { tipo_cuenta, nombre, moneda, saldo }
+let tablasCategorias = []; // { descripcion, categoria }
+let tablasTipos      = []; // { medio_pago, tipo }
 
 // ═══════════════════════════════════════════
 // INIT
@@ -872,12 +872,67 @@ async function cargarSheet(){
     }
   } catch(e){ showToast('Error al cargar Sheet'); }
 
-  // Cargar saldos iniciales también
+  // PASO 3 — Cargar las tres tablas de referencia en una sola llamada
   try{
-    const r2 = await fetch(url+'?action=saldos');
+    const r2 = await fetch(url+'?action=cuentas');
     const d2 = await r2.json();
-    if(d2.status==='ok') saldosIniciales = d2.rows||[];
+    if(d2.status==='ok'){
+      tablasCuentas    = d2.cuentas    || [];
+      tablasCategorias = d2.categorias || [];
+      tablasTipos      = d2.tipos      || [];
+      // PASO 5 — Poblar dropdowns con datos reales
+      poblarDropdownsFormulario();
+    }
+  } catch(e){ /* silencioso — los dropdowns quedan vacíos */ }
+
+  // Cargar saldos iniciales
+  try{
+    const r3 = await fetch(url+'?action=saldos');
+    const d3 = await r3.json();
+    if(d3.status==='ok') saldosIniciales = d3.rows||[];
   } catch(e){ /* silencioso */ }
+}
+
+// PASO 5 — Poblado de dropdowns y datalists con datos reales del Sheet
+function poblarDropdownsFormulario(){
+  // EN → muestra Egreso + Balance (destinos válidos de dinero)
+  const optsEN = tablasCuentas
+    .filter(c => c.tipo_cuenta === 'Egreso' || c.tipo_cuenta === 'Balance')
+    .map(c => c.nombre)
+    .filter((v, i, a) => a.indexOf(v) === i) // únicos
+    .sort();
+
+  const listEN = document.getElementById('list-en');
+  if(listEN){
+    listEN.innerHTML = optsEN.map(n => `<option value="${n}">`).join('');
+  }
+
+  // CON → muestra Ingreso + Balance (orígenes válidos de dinero)
+  const optsCON = tablasCuentas
+    .filter(c => c.tipo_cuenta === 'Ingreso' || c.tipo_cuenta === 'Balance')
+    .map(c => c.nombre)
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .sort();
+
+  const listCON = document.getElementById('list-con');
+  if(listCON){
+    listCON.innerHTML = optsCON.map(n => `<option value="${n}">`).join('');
+  }
+
+  // Categoría → desde tabla Categorias, sin TBD ni Cuenta Balance al principio
+  const catSelect = document.getElementById('f-categoria');
+  if(catSelect && tablasCategorias.length){
+    const cats = [...new Set(
+      tablasCategorias
+        .map(c => c.categoria)
+        .filter(c => c && c !== 'TBD' && c !== 'Cuenta Balance')
+    )].sort();
+
+    catSelect.innerHTML =
+      '<option value="">Sin categoría</option>' +
+      '<option value="Cuenta Balance">Cuenta Balance</option>' +
+      cats.map(c => `<option value="${c}">${c}</option>`).join('');
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -1297,24 +1352,52 @@ async function procesarTx(){
   document.getElementById('form-resultado').style.display='none';
 
   const hoy=new Date().toISOString().split('T')[0];
-  const prompt=`Sos un asistente de finanzas personales argentino. Extraé los datos de esta transacción y respondé SOLO con JSON válido sin texto adicional.
+
+  // PASO 4 — Construir listas de cuentas reales para el prompt
+  const nombresEN  = tablasCuentas
+    .filter(c => c.tipo_cuenta === 'Egreso'  || c.tipo_cuenta === 'Balance')
+    .map(c => c.nombre).filter((v,i,a)=>a.indexOf(v)===i).sort();
+
+  const nombresCON = tablasCuentas
+    .filter(c => c.tipo_cuenta === 'Ingreso' || c.tipo_cuenta === 'Balance')
+    .map(c => c.nombre).filter((v,i,a)=>a.indexOf(v)===i).sort();
+
+  const nombresCats = [...new Set(
+    tablasCategorias.map(c=>c.categoria).filter(c=>c&&c!=='TBD')
+  )].sort();
+
+  // Si no hay tablas cargadas aún, usar fallbacks básicos
+  const listaEN  = nombresEN.length  ? nombresEN.join(', ')  : 'Supermercado, Spotify, Alquiler, Verduleria, Netflix, etc.';
+  const listaCON = nombresCON.length ? nombresCON.join(', ') : 'Visa Santander, AMEX Santander, MP, Efectivo, Santander, etc.';
+  const listaCats= nombresCats.length? nombresCats.join(', '): 'Alimentación & Salidas, Tech & Suscripciones, Vivienda & Hogar, etc.';
+
+  const prompt=`Sos un asistente de finanzas personales argentino. Extraé los datos de esta transacción y respondé SOLO con JSON válido sin texto adicional ni markdown.
 
 Transacción: "${txt}"
+
+REGLAS CRÍTICAS — respetá al pie de la letra:
+1. EN = destino del dinero (¿adónde fue?). CON = origen del dinero (¿de dónde vino?).
+2. Usá EXACTAMENTE los nombres de las listas de abajo. Sin tildes si no los tienen, sin cambiar mayúsculas, sin agregar palabras.
+3. Si el nombre que mencionó el usuario se parece a uno de la lista (aunque esté mal escrito o sin tilde), usá el de la lista.
+4. Monto SIEMPRE positivo.
+5. Si no sabés la fecha exacta usá ${hoy}. Moneda default: ARS.
+
+Nombres válidos para EN: ${listaEN}
+Nombres válidos para CON: ${listaCON}
+Categorías válidas: ${listaCats}
 
 Devolvé exactamente este JSON:
 {
   "fecha": "YYYY-MM-DD",
   "monto": número positivo,
   "moneda": "ARS"|"USD"|"USDT"|"BTC"|"NVDA"|"AGRO"|"PAMP"|"PAXG"|"SLV",
-  "descripcion": "qué se compró / para qué",
-  "medio_pago": "con qué se pagó (Visa Santander, AMEX Santander, Santander, MP, Efectivo, etc.)",
-  "categoria": una de estas: "Vivienda & Hogar"|"Alimentación & Salidas"|"Transporte & Vehículo"|"Salud & Bienestar"|"Tech & Suscripciones"|"Viajes & Ocio"|"Evangelista"|"Finanzas & Obligaciones"|"Compras Personales & Regalos"|"Mascotas"|"Varios / A Clasificar",
+  "descripcion": "nombre exacto de la lista EN, o descripción si es nuevo",
+  "medio_pago": "nombre exacto de la lista CON, o medio si es nuevo",
+  "categoria": "categoría exacta de la lista",
   "comentario": "nota opcional",
   "cuota": número o null,
   "cuotas": número o null
-}
-
-Si no sabés la fecha exacta usá ${hoy}. Moneda default: ARS.`;
+}`;
 
   try{
     const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
