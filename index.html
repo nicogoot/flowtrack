@@ -145,6 +145,9 @@ td{padding:8px 10px;color:var(--text)}
 .config-input{width:140px;padding:6px 10px;border-radius:var(--r2);background:var(--card2);border:1px solid var(--border);color:var(--text);font-size:13px;font-family:var(--mono);text-align:right}
 .config-input:focus{border-color:var(--accent)}
 .divider{height:1px;background:var(--border);margin:12px 0}
+.cred-filters{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.cred-check{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text);cursor:pointer;padding:4px 8px;border-radius:var(--r2);background:var(--card);border:1px solid var(--border);flex:1;justify-content:center}
+.cred-check input{accent-color:var(--accent);width:14px;height:14px}
 </style>
 </head>
 <body>
@@ -163,6 +166,7 @@ td{padding:8px 10px;color:var(--text)}
     <button class="tab active" onclick="showTab('cargar')"   id="tab-cargar">📝 Cargar</button>
     <button class="tab"        onclick="showTab('historial')" id="tab-historial">📋 Historial</button>
     <button class="tab"        onclick="showTab('tracker')"   id="tab-tracker">📊 Tracker</button>
+    <button class="tab"        onclick="showTab('creditos')"  id="tab-creditos">💳 Créditos</button>
     <button class="tab"        onclick="showTab('config')"    id="tab-config">⚙️ Config</button>
   </nav>
 
@@ -272,6 +276,41 @@ td{padding:8px 10px;color:var(--text)}
     <div class="cat-accordion" id="trackerAccordion"></div>
   </div>
 
+  <!-- CRÉDITOS -->
+  <div class="panel" id="panel-creditos">
+
+    <!-- Filtros -->
+    <div class="cred-filters">
+      <div class="hist-filter-row">
+        <input type="date" class="form-control" id="cred-desde" onchange="renderCreditos()" style="font-size:13px">
+        <input type="date" class="form-control" id="cred-hasta" onchange="renderCreditos()" style="font-size:13px">
+      </div>
+      <div class="hist-filter-row" style="flex-wrap:wrap;gap:6px">
+        <label class="cred-check"><input type="checkbox" id="ck-visa" checked onchange="renderCreditos()"> Visa Santander</label>
+        <label class="cred-check"><input type="checkbox" id="ck-amex" checked onchange="renderCreditos()"> AMEX Santander</label>
+        <label class="cred-check"><input type="checkbox" id="ck-pae"  checked onchange="renderCreditos()"> AMEX PAE</label>
+      </div>
+      <div class="hist-filter-row">
+        <label class="cred-check"><input type="checkbox" id="ck-ars" checked onchange="renderCreditos()"> ARS</label>
+        <label class="cred-check"><input type="checkbox" id="ck-usd" checked onchange="renderCreditos()"> USD</label>
+      </div>
+    </div>
+
+    <!-- Mini chart -->
+    <div style="position:relative;width:100%;height:160px;margin-bottom:16px">
+      <canvas id="credChart"></canvas>
+    </div>
+
+    <!-- Tabla gastos por tarjeta -->
+    <div class="card-title" style="margin-bottom:8px">Gastos (CON tarjeta)</div>
+    <div class="tbl-wrap" id="cred-gastos-wrap" style="margin-bottom:16px"></div>
+
+    <!-- Tabla pagos -->
+    <div class="card-title" style="margin-bottom:8px">Pagos (EN pago tarjeta)</div>
+    <div class="tbl-wrap" id="cred-pagos-wrap"></div>
+
+  </div>
+
   <!-- CONFIG -->
   <div class="panel" id="panel-config">
     <div class="config-section">
@@ -334,11 +373,12 @@ function guardarTasas(){
   showToast('Tasas guardadas ✓');
 }
 
-const TABS=['cargar','historial','tracker','config'];
+const TABS=['cargar','historial','tracker','creditos','config'];
 function showTab(id){
   TABS.forEach(t=>{ document.getElementById('panel-'+t).classList.toggle('active',t===id); const b=document.getElementById('tab-'+t); if(b) b.classList.toggle('active',t===id); });
   if(id==='historial') renderHistorial();
   if(id==='tracker')   renderTracker();
+  if(id==='creditos')  renderCreditos();
 }
 
 async function syncSheet(){ const b=document.getElementById('btnSync'); b.style.animation='spin .7s linear infinite'; setSyncDot('loading'); await cargarSheet(); b.style.animation=''; }
@@ -456,12 +496,31 @@ async function guardarTx(){
     rows.push([t.fecha||fila[0],t.monto||0,t.moneda||'ARS',t.descripcion||'',t.comentario||'',t.medio_pago||'','',t.categoria||'Activos Adquiridos','','','','']);
   }
   try{
-    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rows})});
-    const d=await res.json();
-    if(d.status==='ok'){ showToast(`✓ ${rows.length} guardada(s)`); setSyncDot('ok'); resetForm(); await cargarSheet(); }
-    else { showToast('Error: '+d.message); setSyncDot('err'); }
-  } catch(e){ showToast('Error de conexión'); setSyncDot('err'); }
-  finally{ document.getElementById('btnGuardar').disabled=false; window._pendingTx2=null; }
+    await jsonpPost(url, {rows});
+    showToast(`✓ ${rows.length} guardada(s)`);
+    setSyncDot('ok');
+    resetForm();
+    await cargarSheet();
+  } catch(e){
+    showToast('Error al guardar');
+    setSyncDot('err');
+  } finally{
+    document.getElementById('btnGuardar').disabled=false;
+    window._pendingTx2=null;
+  }
+}
+
+function jsonpPost(url, payload){
+  return new Promise((resolve, reject)=>{
+    const cbName='cb_'+Date.now();
+    const script=document.createElement('script');
+    const timeout=setTimeout(()=>{ cleanup(); resolve('ok'); }, 8000);
+    window[cbName]=(data)=>{ cleanup(); resolve(data); };
+    script.onerror=()=>{ cleanup(); reject(new Error('Script error')); };
+    script.src=url+'?callback='+cbName+'&data='+encodeURIComponent(JSON.stringify(payload));
+    document.head.appendChild(script);
+    function cleanup(){ clearTimeout(timeout); delete window[cbName]; script.parentNode?.removeChild(script); }
+  });
 }
 
 function resetForm(){ document.getElementById('txInput').value=''; document.getElementById('form-resultado').style.display='none'; window._pendingTx2=null; }
@@ -583,7 +642,221 @@ function setSortState(id,col,dir){ sortState[id]={col,dir}; }
 function sortIcon(id,col){ const s=sortState[id]; if(!s||s.col!==col) return'<span class="sort-icon">⇅</span>'; return`<span class="sort-icon active">${s.dir==='asc'?'↑':'↓'}</span>`; }
 function setSyncDot(state){ document.getElementById('syncDot').className='sync-dot'+(state?' '+state:''); }
 function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+
+// ══════════════════════════════════════════════
+// CRÉDITOS
+// ══════════════════════════════════════════════
+let credChart = null;
+
+function initCredFiltros(){
+  if(document.getElementById('cred-desde').value) return;
+  const now = new Date();
+  const desde = new Date(now.getFullYear(), now.getMonth()-5, 1);
+  document.getElementById('cred-desde').value = desde.toISOString().split('T')[0];
+  document.getElementById('cred-hasta').value = now.toISOString().split('T')[0];
+}
+
+function renderCreditos(){
+  initCredFiltros();
+
+  const desde  = document.getElementById('cred-desde').value;
+  const hasta  = document.getElementById('cred-hasta').value;
+  const ckVisa = document.getElementById('ck-visa').checked;
+  const ckAmex = document.getElementById('ck-amex').checked;
+  const ckPae  = document.getElementById('ck-pae').checked;
+  const ckARS  = document.getElementById('ck-ars').checked;
+  const ckUSD  = document.getElementById('ck-usd').checked;
+
+  const tarjetas = [];
+  if(ckVisa) tarjetas.push('Visa Santander');
+  if(ckAmex) tarjetas.push('AMEX Santander');
+  if(ckPae)  tarjetas.push('AMEX PAE');
+
+  const monedas = [];
+  if(ckARS) monedas.push('ARS');
+  if(ckUSD) monedas.push('USD');
+
+  // Filtrar por fecha
+  const rowsFiltradas = allRows.filter(r=>{
+    const f = partesFecha(r);
+    if(!f.y) return false;
+    const fd = new Date(f.y, f.m-1, f.d||1).toISOString().split('T')[0];
+    if(desde && fd < desde) return false;
+    if(hasta && fd > hasta) return false;
+    if(!monedas.includes(str(r.moneda)||'ARS')) return false;
+    return true;
+  });
+
+  // ── GASTOS: filas donde CON es una tarjeta seleccionada ──
+  const gastos = rowsFiltradas.filter(r => tarjetas.includes(str(r.medio_pago)));
+
+  // ── PAGOS: filas donde EN es "Pago Visa Santander" o "Pago Amex" ──
+  const PAGO_ENS = ['Pago Visa Santander','Pago Amex','Pago AMEX Santander','Pago AMEX'];
+  const pagos = rowsFiltradas.filter(r => PAGO_ENS.some(p => str(r.descripcion).toLowerCase() === p.toLowerCase()));
+
+  // Obtener meses del rango
+  const meses = getMesesRango(desde, hasta);
+
+  // ── Armar datos por tarjeta x mes ──
+  const TARJETA_LABELS = {
+    'Visa Santander': 'Visa Santander',
+    'AMEX Santander': 'AMEX Santander',
+    'AMEX PAE':       'AMEX PAE',
+  };
+
+  const gastosData = {}; // { 'Visa Santander': { 'ARS': {'2025-01': 50000, ...}, 'USD': {...} } }
+  tarjetas.forEach(t => { gastosData[t] = {}; monedas.forEach(m => gastosData[t][m] = {}); });
+
+  gastos.forEach(r => {
+    const t   = str(r.medio_pago);
+    const mon = str(r.moneda)||'ARS';
+    const f   = partesFecha(r);
+    if(!f.y) return;
+    const key = `${f.y}-${String(f.m).padStart(2,'0')}`;
+    if(gastosData[t] && gastosData[t][mon] !== undefined){
+      gastosData[t][mon][key] = (gastosData[t][mon][key]||0) + (parseFloat(r.monto)||0);
+    }
+  });
+
+  // ── Tabla gastos ──
+  const gastosWrap = document.getElementById('cred-gastos-wrap');
+  if(!meses.length || !tarjetas.length){
+    gastosWrap.innerHTML='<div class="empty">Sin datos</div>';
+  } else {
+    const mesHeaders = meses.map(k=>`<th>${fmtMesKey(k)}</th>`).join('');
+    let rows = '';
+    tarjetas.forEach(t=>{
+      monedas.forEach(mon=>{
+        const rowData = meses.map(k=> gastosData[t]?.[mon]?.[k] || 0);
+        const total   = rowData.reduce((a,v)=>a+v,0);
+        if(!total) return;
+        rows += `<tr>
+          <td style="white-space:nowrap;font-weight:600">${t}<br><span style="font-size:10px;color:var(--muted);font-weight:400">${mon}</span></td>
+          ${rowData.map(v=>`<td class="td-mono">${v?'$'+fmtNum(v):'-'}</td>`).join('')}
+          <td class="td-mono" style="color:var(--accent);font-weight:700">$${fmtNum(total)}</td>
+        </tr>`;
+      });
+    });
+    // Totales por mes
+    const totalesMes = meses.map(k=>{
+      let sum=0;
+      tarjetas.forEach(t=>{ monedas.forEach(mon=>{ sum+=gastosData[t]?.[mon]?.[k]||0; }); });
+      return sum;
+    });
+    const totalTotal = totalesMes.reduce((a,v)=>a+v,0);
+    rows += `<tr style="background:var(--card2);font-weight:700">
+      <td>TOTAL</td>
+      ${totalesMes.map(v=>`<td class="td-mono">$${fmtNum(v)}</td>`).join('')}
+      <td class="td-mono" style="color:var(--accent)">$${fmtNum(totalTotal)}</td>
+    </tr>`;
+    gastosWrap.innerHTML=`<table>
+      <thead><tr><th>Tarjeta</th>${mesHeaders}<th>Total</th></tr></thead>
+      <tbody>${rows||'<tr><td colspan="'+(meses.length+2)+'"><div class="empty">Sin gastos</div></td></tr>'}</tbody>
+    </table>`;
+  }
+
+  // ── Tabla pagos ──
+  const pagosData = {}; // { 'Pago Visa Santander': { ARS: {...}, USD: {...} } }
+  pagos.forEach(r=>{
+    const en  = str(r.descripcion);
+    const mon = str(r.moneda)||'ARS';
+    const f   = partesFecha(r);
+    if(!f.y) return;
+    const key = `${f.y}-${String(f.m).padStart(2,'0')}`;
+    if(!pagosData[en]) pagosData[en]={};
+    if(!pagosData[en][mon]) pagosData[en][mon]={};
+    pagosData[en][mon][key] = (pagosData[en][mon][key]||0) + (parseFloat(r.monto)||0);
+  });
+
+  const pagosWrap = document.getElementById('cred-pagos-wrap');
+  if(!Object.keys(pagosData).length){
+    pagosWrap.innerHTML='<div class="empty">Sin pagos en el período</div>';
+  } else {
+    const mesHeaders2 = meses.map(k=>`<th>${fmtMesKey(k)}</th>`).join('');
+    let rows2='';
+    Object.entries(pagosData).forEach(([en, monObj])=>{
+      Object.entries(monObj).forEach(([mon, mesObj])=>{
+        const rowData = meses.map(k=>mesObj[k]||0);
+        const total   = rowData.reduce((a,v)=>a+v,0);
+        if(!total) return;
+        rows2+=`<tr>
+          <td style="white-space:nowrap;font-weight:600">${en}<br><span style="font-size:10px;color:var(--muted);font-weight:400">${mon}</span></td>
+          ${rowData.map(v=>`<td class="td-mono">${v?'$'+fmtNum(v):'-'}</td>`).join('')}
+          <td class="td-mono" style="color:var(--green);font-weight:700">$${fmtNum(total)}</td>
+        </tr>`;
+      });
+    });
+    pagosWrap.innerHTML=`<table>
+      <thead><tr><th>Pago</th>${mesHeaders2}<th>Total</th></tr></thead>
+      <tbody>${rows2||'<tr><td colspan="'+(meses.length+2)+'"><div class="empty">Sin pagos</div></td></tr>'}</tbody>
+    </table>`;
+  }
+
+  // ── Mini chart barras apiladas ──
+  renderCredChart(meses, tarjetas, monedas, gastosData);
+}
+
+function getMesesRango(desde, hasta){
+  if(!desde||!hasta) return [];
+  const meses=[];
+  const d=new Date(desde); d.setDate(1);
+  const h=new Date(hasta);
+  while(d<=h){
+    meses.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+    d.setMonth(d.getMonth()+1);
+  }
+  return meses;
+}
+
+function fmtMesKey(k){
+  const [y,m]=k.split('-');
+  return MESES[+m-1]+" '"+y.slice(2);
+}
+
+function renderCredChart(meses, tarjetas, monedas, gastosData){
+  const canvas=document.getElementById('credChart');
+  if(!canvas) return;
+  if(credChart){ credChart.destroy(); credChart=null; }
+  if(!meses.length) return;
+
+  const COLORS={
+    'Visa Santander':'#0099ff',
+    'AMEX Santander':'#00d4aa',
+    'AMEX PAE':      '#ffa502',
+  };
+
+  const datasets=[];
+  tarjetas.forEach(t=>{
+    monedas.forEach(mon=>{
+      const data=meses.map(k=>Math.round(gastosData[t]?.[mon]?.[k]||0));
+      if(!data.some(v=>v>0)) return;
+      datasets.push({
+        label: t+(monedas.length>1?' ('+mon+')':''),
+        data,
+        backgroundColor: COLORS[t]||(mon==='USD'?'#ffa502':'#0099ff'),
+        borderRadius:3,
+        borderSkipped:false,
+      });
+    });
+  });
+
+  credChart=new Chart(canvas,{
+    type:'bar',
+    data:{ labels:meses.map(fmtMesKey), datasets },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:datasets.length>1, labels:{ color:'#8a8d9a', font:{size:11}, boxWidth:10 } } },
+      scales:{
+        x:{ stacked:true, ticks:{color:'#8a8d9a',font:{size:10}}, grid:{color:'rgba(255,255,255,0.05)'} },
+        y:{ stacked:true, ticks:{color:'#8a8d9a',font:{size:10}, callback:v=>'$'+fmtNum(v)}, grid:{color:'rgba(255,255,255,0.05)'} }
+      }
+    }
+  });
+}
+
 document.getElementById('txInput').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();procesarTx();} });
+
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 </body>
 </html>
