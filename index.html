@@ -326,6 +326,7 @@ td{padding:8px 10px;color:var(--text)}
       <div class="hist-filter-row">
         <label class="cred-check"><input type="checkbox" id="ck-eg-ars" checked onchange="renderEgresos()"> ARS</label>
         <label class="cred-check"><input type="checkbox" id="ck-eg-usd" checked onchange="renderEgresos()"> USD</label>
+        <label class="cred-check" style="flex:2"><input type="checkbox" id="ck-eg-credito" onchange="renderEgresos()"> + Tarjetas de crédito</label>
       </div>
     </div>
 
@@ -537,14 +538,20 @@ async function guardarTx(){
     rows.push([t.fecha||fila[0],t.monto||0,t.moneda||'ARS',t.descripcion||'',t.comentario||'',t.medio_pago||'','',t.categoria||'Activos Adquiridos','','','','']);
   }
   try{
-    await jsonpPost(url, {rows});
+    // no-cors: Apps Script acepta esto, no podemos leer la respuesta pero los datos se guardan
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({rows})
+    });
     showToast(`✓ ${rows.length} guardada(s)`);
     setSyncDot('ok');
     resetForm();
-    await cargarSheet();
   } catch(e){
     showToast('Error al guardar');
     setSyncDot('err');
+    console.error(e);
   } finally{
     document.getElementById('btnGuardar').disabled=false;
     window._pendingTx2=null;
@@ -555,7 +562,7 @@ function jsonpPost(url, payload){
   return new Promise((resolve, reject)=>{
     const cbName='cb_'+Date.now();
     const script=document.createElement('script');
-    const timeout=setTimeout(()=>{ cleanup(); resolve('ok'); }, 8000);
+    const timeout=setTimeout(()=>{ cleanup(); resolve('timeout-ok'); }, 20000);
     window[cbName]=(data)=>{ cleanup(); resolve(data); };
     script.onerror=()=>{ cleanup(); reject(new Error('Script error')); };
     script.src=url+'?callback='+cbName+'&data='+encodeURIComponent(JSON.stringify(payload));
@@ -953,9 +960,12 @@ function renderEgresos(){
 
   const desde  = document.getElementById('eg-desde').value;
   const hasta  = document.getElementById('eg-hasta').value;
-  const ckARS  = document.getElementById('ck-eg-ars').checked;
-  const ckUSD  = document.getElementById('ck-eg-usd').checked;
+  const ckARS     = document.getElementById('ck-eg-ars').checked;
+  const ckUSD     = document.getElementById('ck-eg-usd').checked;
+  const ckCredito = document.getElementById('ck-eg-credito').checked;
   const monedas = [...(ckARS?['ARS']:[]), ...(ckUSD?['USD']:[])];
+
+  const TARJETAS_CREDITO = ['visa santander','amex santander','amex pae'];
 
   const catsActivas = new Set(
     [...document.querySelectorAll('.ck-eg-cat:checked')].map(el=>el.value)
@@ -964,7 +974,7 @@ function renderEgresos(){
   const meses = getMesesRango(desde, hasta);
   const dias  = meses.length * 30.4;
 
-  // Filtrar: CON es cuenta balance, categoría activa, no es Cuenta Balance
+  // Filtrar: CON es cuenta balance O (si checkbox activo) tarjeta de crédito
   const rows = allRows.filter(r=>{
     const f = partesFecha(r); if(!f.y) return false;
     const fd = `${f.y}-${String(f.m).padStart(2,'0')}-${String(f.d||1).padStart(2,'0')}`;
@@ -973,7 +983,9 @@ function renderEgresos(){
     const mon = str(r.moneda)||'ARS';
     if(!monedas.includes(mon)) return false;
     const con = str(r.medio_pago).toLowerCase();
-    if(!CUENTAS_BALANCE_CON.map(c=>c.toLowerCase()).includes(con)) return false;
+    const esBalance  = CUENTAS_BALANCE_CON.map(c=>c.toLowerCase()).includes(con);
+    const esCredito  = TARJETAS_CREDITO.includes(con);
+    if(!esBalance && !(ckCredito && esCredito)) return false;
     const cat = str(r.categoria);
     if(cat === 'Cuenta Balance') return false;
     if(!catsActivas.has(cat) && cat) return false;
