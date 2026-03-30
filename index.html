@@ -151,6 +151,23 @@ td{padding:8px 10px;color:var(--text)}
 .cred-filters{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
 .cred-check{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text);cursor:pointer;padding:4px 8px;border-radius:var(--r2);background:var(--card);border:1px solid var(--border);flex:1;justify-content:center}
 .cred-check input{accent-color:var(--accent);width:14px;height:14px}
+
+/* MULTI-SELECT DROPDOWN */
+.multi-select{position:relative}
+.multi-select-btn{width:100%;padding:8px 12px;border-radius:var(--r2);background:var(--card);border:1px solid var(--border);color:var(--text);font-size:13px;text-align:left;display:flex;justify-content:space-between;align-items:center;transition:border .15s}
+.multi-select-btn:hover,.multi-select-btn.open{border-color:var(--accent)}
+.multi-select-btn .arrow{font-size:10px;color:var(--muted);transition:transform .2s}
+.multi-select-btn.open .arrow{transform:rotate(180deg)}
+.multi-select-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--border2);border-radius:var(--r2);z-index:50;max-height:240px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.multi-select-dropdown.show{display:block}
+.multi-select-actions{display:flex;gap:4px;padding:8px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:1}
+.multi-select-actions button{flex:1;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600;background:var(--card2);color:var(--muted);border:1px solid var(--border)}
+.multi-select-actions button:hover{color:var(--text);border-color:var(--border2)}
+.ms-option{display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:13px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--border)}
+.ms-option:last-child{border-bottom:none}
+.ms-option:hover{background:var(--card2)}
+.ms-option input{accent-color:var(--accent);width:14px;height:14px;flex-shrink:0}
+.ms-option .ms-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -171,6 +188,7 @@ td{padding:8px 10px;color:var(--text)}
     <button class="tab"        onclick="showTab('tracker')"   id="tab-tracker">📊 Tracker</button>
     <button class="tab"        onclick="showTab('creditos')"  id="tab-creditos">💳 Créditos</button>
     <button class="tab"        onclick="showTab('egresos')"   id="tab-egresos">💸 Egresos</button>
+    <button class="tab"        onclick="showTab('ingresos')" id="tab-ingresos">💰 Ingresos</button>
     <button class="tab"        onclick="showTab('config')"    id="tab-config">⚙️ Config</button>
   </nav>
 
@@ -195,18 +213,12 @@ td{padding:8px 10px;color:var(--text)}
           <input type="number" class="form-control" id="f-monto" step="0.01" min="0">
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Moneda</label>
-          <select class="form-control" id="f-moneda">
-            <option>ARS</option><option>USD</option><option>USDT</option><option>BTC</option>
-            <option>PAXG</option><option>NVDA</option><option>AGRO</option><option>PAMP</option><option>SMCI</option><option>GTLB</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Categoría</label>
-          <select class="form-control" id="f-categoria"><option value="">— elegir —</option></select>
-        </div>
+      <div class="form-group">
+        <label class="form-label">Moneda</label>
+        <select class="form-control" id="f-moneda">
+          <option>ARS</option><option>USD</option><option>USDT</option><option>BTC</option>
+          <option>PAXG</option><option>NVDA</option><option>AGRO</option><option>PAMP</option><option>SMCI</option><option>GTLB</option>
+        </select>
       </div>
       <div class="form-group">
         <label class="form-label">EN — destino del dinero</label>
@@ -248,11 +260,11 @@ td{padding:8px 10px;color:var(--text)}
       <div class="hist-filter-row">
         <input type="text" id="h-en" placeholder="Buscar EN..." oninput="renderHistorial()" list="list-h-en">
         <datalist id="list-h-en"></datalist>
-        <select id="h-cat" onchange="renderHistorial()"><option value="">Todas las categorías</option></select>
+        <select id="h-cat" onchange="renderHistorial()"><option value="">Cat. Destino (todas)</option></select>
       </div>
       <div class="hist-filter-row">
+        <select id="h-con" onchange="renderHistorial()"><option value="">Todas las cuentas</option></select>
         <select id="h-moneda" onchange="renderHistorial()"><option value="">Todas las monedas</option></select>
-        <button class="btn btn-secondary" style="flex:0 0 auto;padding:8px 14px;font-size:13px" onclick="syncSheet()">↻ Sync</button>
       </div>
     </div>
     <div class="hist-summary">
@@ -330,8 +342,20 @@ td{padding:8px 10px;color:var(--text)}
       </div>
     </div>
 
-    <!-- Filtro categorías -->
-    <div id="eg-cats-checks" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
+    <!-- Filtro categorías destino -->
+    <div class="multi-select" id="eg-cats-ms" style="margin-bottom:14px">
+      <button class="multi-select-btn" onclick="toggleMultiSelect('eg-cats-ms')">
+        <span id="eg-cats-label">Categorías Destino (todas)</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="multi-select-dropdown" id="eg-cats-dropdown">
+        <div class="multi-select-actions">
+          <button onclick="msSelectAll('eg-cats-ms');renderEgresos()">Todas</button>
+          <button onclick="msSelectNone('eg-cats-ms');renderEgresos()">Ninguna</button>
+        </div>
+        <div id="eg-cats-options"></div>
+      </div>
+    </div>
 
     <!-- Chart -->
     <div style="position:relative;width:100%;height:180px;margin-bottom:16px">
@@ -349,6 +373,54 @@ td{padding:8px 10px;color:var(--text)}
     <!-- Tabla por categoría/EN -->
     <div class="card-title" style="margin-bottom:8px">Detalle por EN</div>
     <div class="tbl-wrap" id="eg-tabla-wrap"></div>
+
+  </div>
+
+  <!-- INGRESOS REALES -->
+  <div class="panel" id="panel-ingresos">
+
+    <div class="cred-filters">
+      <div class="hist-filter-row">
+        <input type="date" class="form-control" id="ig-desde" onchange="renderIngresos()" style="font-size:13px">
+        <input type="date" class="form-control" id="ig-hasta" onchange="renderIngresos()" style="font-size:13px">
+      </div>
+      <div class="hist-filter-row">
+        <label class="cred-check"><input type="checkbox" id="ck-ig-ars" checked onchange="renderIngresos()"> ARS</label>
+        <label class="cred-check"><input type="checkbox" id="ck-ig-usd" checked onchange="renderIngresos()"> USD</label>
+      </div>
+    </div>
+
+    <!-- Filtro categorías origen -->
+    <div class="multi-select" id="ig-cats-ms" style="margin-bottom:14px">
+      <button class="multi-select-btn" onclick="toggleMultiSelect('ig-cats-ms')">
+        <span id="ig-cats-label">Categorías Origen (todas)</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="multi-select-dropdown" id="ig-cats-dropdown">
+        <div class="multi-select-actions">
+          <button onclick="msSelectAll('ig-cats-ms');renderIngresos()">Todas</button>
+          <button onclick="msSelectNone('ig-cats-ms');renderIngresos()">Ninguna</button>
+        </div>
+        <div id="ig-cats-options"></div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div style="position:relative;width:100%;height:180px;margin-bottom:16px">
+      <canvas id="igChart"></canvas>
+    </div>
+
+    <!-- Resumen -->
+    <div class="tracker-summary" style="margin-bottom:16px">
+      <div class="tr-stat"><div class="tr-stat-lbl">Total</div><div class="tr-stat-val" id="ig-total">—</div></div>
+      <div class="tr-stat"><div class="tr-stat-lbl">Por mes</div><div class="tr-stat-val" id="ig-mes">—</div></div>
+      <div class="tr-stat"><div class="tr-stat-lbl">Por semana</div><div class="tr-stat-val" id="ig-sem">—</div></div>
+      <div class="tr-stat"><div class="tr-stat-lbl">Por día</div><div class="tr-stat-val" id="ig-dia">—</div></div>
+    </div>
+
+    <!-- Tabla por fuente de ingreso -->
+    <div class="card-title" style="margin-bottom:8px">Detalle por fuente de ingreso</div>
+    <div class="tbl-wrap" id="ig-tabla-wrap"></div>
 
   </div>
 
@@ -414,13 +486,14 @@ function guardarTasas(){
   showToast('Tasas guardadas ✓');
 }
 
-const TABS=['cargar','historial','tracker','creditos','egresos','config'];
+const TABS=['cargar','historial','tracker','creditos','egresos','ingresos','config'];
 function showTab(id){
   TABS.forEach(t=>{ document.getElementById('panel-'+t).classList.toggle('active',t===id); const b=document.getElementById('tab-'+t); if(b) b.classList.toggle('active',t===id); });
   if(id==='historial') renderHistorial();
   if(id==='tracker')   renderTracker();
   if(id==='creditos')  renderCreditos();
   if(id==='egresos')   renderEgresos();
+  if(id==='ingresos')  renderIngresos();
 }
 
 async function syncSheet(){ const b=document.getElementById('btnSync'); b.style.animation='spin .7s linear infinite'; setSyncDot('loading'); await cargarSheet(); b.style.animation=''; }
@@ -445,10 +518,27 @@ function poblarFiltros(){
   const monedas=[...new Set(allRows.map(r=>str(r.moneda)).filter(Boolean))].sort();
   const cats=[...new Set(allRows.map(r=>str(r.categoria)).filter(c=>c))].sort();
   const ens=[...new Set(allRows.map(r=>str(r.descripcion)).filter(Boolean))].sort();
+  const cons=[...new Set(allRows.map(r=>str(r.medio_pago)).filter(Boolean))].sort();
+
+  // Guardar valores actuales antes de repoblar
+  const curAño=document.getElementById('h-año')?.value||'';
+  const curMes=document.getElementById('h-mes')?.value||'';
+  const curMon=document.getElementById('h-moneda')?.value||'';
+  const curCat=document.getElementById('h-cat')?.value||'';
+  const curCon=document.getElementById('h-con')?.value||'';
+
   const elAño=document.getElementById('h-año'); if(elAño) elAño.innerHTML='<option value="">Todos los años</option>'+años.map(y=>`<option>${y}</option>`).join('');
   const elMon=document.getElementById('h-moneda'); if(elMon) elMon.innerHTML='<option value="">Todas las monedas</option>'+monedas.map(m=>`<option>${m}</option>`).join('');
-  const elCat=document.getElementById('h-cat'); if(elCat) elCat.innerHTML='<option value="">Todas las categorías</option>'+cats.map(c=>`<option>${c}</option>`).join('');
+  const elCat=document.getElementById('h-cat'); if(elCat) elCat.innerHTML='<option value="">Cat. Destino (todas)</option>'+cats.map(c=>`<option>${c}</option>`).join('');
   const elEn=document.getElementById('list-h-en'); if(elEn) elEn.innerHTML=ens.map(e=>`<option value="${e}">`).join('');
+  const elCon=document.getElementById('h-con'); if(elCon) elCon.innerHTML='<option value="">Todas las cuentas</option>'+cons.map(c=>`<option>${c}</option>`).join('');
+
+  // Restaurar valores
+  if(curAño && elAño) elAño.value=curAño;
+  if(curMes) document.getElementById('h-mes').value=curMes;
+  if(curMon && elMon) elMon.value=curMon;
+  if(curCat && elCat) elCat.value=curCat;
+  if(curCon && elCon) elCon.value=curCon;
 }
 
 function poblarDropdowns(){
@@ -457,8 +547,8 @@ function poblarDropdowns(){
   const optsCON=tablasCuentas.filter(c=>c.tipo_cuenta==='Ingreso'||c.tipo_cuenta==='Balance').map(c=>c.nombre).filter((v,i,a)=>a.indexOf(v)===i).sort();
   const lCON=document.getElementById('list-con'); if(lCON) lCON.innerHTML=optsCON.map(n=>`<option value="${n}">`).join('');
   const cats=[...new Set(tablasCategorias.map(c=>c.categoria).filter(c=>c&&c!=='TBD'))].sort();
-  const fCat=document.getElementById('f-categoria'); if(fCat&&cats.length) fCat.innerHTML='<option value="">— elegir —</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
-  const hCat=document.getElementById('h-cat'); if(hCat&&cats.length) hCat.innerHTML='<option value="">Todas las categorías</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const curHCat=document.getElementById('h-cat')?.value||'';
+  const hCat=document.getElementById('h-cat'); if(hCat&&cats.length){ hCat.innerHTML='<option value="">Cat. Destino (todas)</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join(''); hCat.value=curHCat; }
 }
 
 async function procesarTx(){
@@ -504,7 +594,6 @@ Respondé con JSON array (1 o 2 elementos):
     document.getElementById('f-moneda').value=tx.moneda||'ARS';
     document.getElementById('f-en').value=tx.descripcion||'';
     document.getElementById('f-con').value=tx.medio_pago||'';
-    document.getElementById('f-categoria').value=tx.categoria||'';
     document.getElementById('f-comentario').value=tx.comentario||'';
     document.getElementById('f-cuota').value=tx.cuota||'';
     document.getElementById('f-cuotas').value=tx.cuotas||'';
@@ -527,7 +616,7 @@ async function guardarTx(){
     document.getElementById('f-comentario').value.trim(),
     document.getElementById('f-con').value.trim(),
     '',
-    document.getElementById('f-categoria').value,
+    '',
     document.getElementById('f-cuota').value||'',
     document.getElementById('f-cuotas').value||'',
     '','',
@@ -580,12 +669,31 @@ function renderHistorial(){
   const mon=document.getElementById('h-moneda')?.value||'';
   const enF=(document.getElementById('h-en')?.value||'').trim().toLowerCase();
   const catF=document.getElementById('h-cat')?.value||'';
+  const conF=document.getElementById('h-con')?.value||'';
   if(año) rows=rows.filter(r=>partesFecha(r).y===año);
   if(mes) rows=rows.filter(r=>partesFecha(r).m===mes);
   if(mon) rows=rows.filter(r=>str(r.moneda)===mon);
   if(enF) rows=rows.filter(r=>str(r.descripcion).toLowerCase().includes(enF));
   if(catF) rows=rows.filter(r=>str(r.categoria)===catF);
-  if(año){ const ms=[...new Set(allRows.filter(r=>partesFecha(r).y===año).map(r=>partesFecha(r).m).filter(Boolean))].sort((a,b)=>a-b); const el=document.getElementById('h-mes'); if(el) el.innerHTML='<option value="">Todos los meses</option>'+ms.map(m=>`<option value="${m}">${MESES[m-1]}</option>`).join(''); }
+  if(conF) rows=rows.filter(r=>str(r.medio_pago)===conF);
+
+  // Rebuild month dropdown based on selected year, preserving current selection
+  const curMes=document.getElementById('h-mes')?.value||'';
+  if(año){
+    const ms=[...new Set(allRows.filter(r=>partesFecha(r).y===año).map(r=>partesFecha(r).m).filter(Boolean))].sort((a,b)=>a-b);
+    const el=document.getElementById('h-mes');
+    if(el){
+      el.innerHTML='<option value="">Todos los meses</option>'+ms.map(m=>`<option value="${m}">${MESES[m-1]}</option>`).join('');
+      el.value=curMes; // restore selection
+    }
+  } else {
+    const el=document.getElementById('h-mes');
+    if(el){
+      el.innerHTML='<option value="">Todos los meses</option>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(m=>`<option value="${m}">${MESES[m-1]}</option>`).join('');
+      el.value=curMes;
+    }
+  }
+
   const sumaARS=rows.filter(r=>!str(r.moneda)||str(r.moneda)==='ARS').reduce((s,r)=>s+(parseFloat(r.monto)||0),0);
   document.getElementById('h-count').textContent=rows.length;
   document.getElementById('h-suma').textContent='$'+fmtNum(sumaARS);
@@ -600,8 +708,10 @@ function renderTablaHistorial(rows,col='fecha',dir='desc'){
         <th class="sortable" onclick="setSortState('h','fecha',getSortDir('h','fecha'));renderTablaHistorial(window._hRows||[])">Fecha${sortIcon('h','fecha')}</th>
         <th class="sortable" onclick="setSortState('h','monto',getSortDir('h','monto'));renderTablaHistorial(window._hRows||[])">Monto${sortIcon('h','monto')}</th>
         <th>Mon</th>
-        <th class="sortable" onclick="setSortState('h','desc',getSortDir('h','desc'));renderTablaHistorial(window._hRows||[])">EN${sortIcon('h','desc')}</th>
-        <th>CON</th><th>Categoría</th>
+        <th class="sortable" onclick="setSortState('h','en',getSortDir('h','en'));renderTablaHistorial(window._hRows||[])">EN${sortIcon('h','en')}</th>
+        <th class="sortable" onclick="setSortState('h','con',getSortDir('h','con'));renderTablaHistorial(window._hRows||[])">CON${sortIcon('h','con')}</th>
+        <th class="sortable" onclick="setSortState('h','cat',getSortDir('h','cat'));renderTablaHistorial(window._hRows||[])">Categoría Destino${sortIcon('h','cat')}</th>
+        <th class="sortable" onclick="setSortState('h','tipo',getSortDir('h','tipo'));renderTablaHistorial(window._hRows||[])">Categoría Origen${sortIcon('h','tipo')}</th>
       </tr></thead><tbody>${s.map(r=>`<tr>
         <td class="td-mono td-muted" style="white-space:nowrap">${esc(fmtFecha(r))}</td>
         <td class="td-mono">${esc(fmtMonto(parseFloat(r.monto)||0))}</td>
@@ -609,6 +719,7 @@ function renderTablaHistorial(rows,col='fecha',dir='desc'){
         <td>${esc(str(r.descripcion))}</td>
         <td class="td-muted">${esc(str(r.medio_pago))}</td>
         <td>${r.categoria?`<span class="badge badge-muted" style="font-size:9px">${esc(str(r.categoria))}</span>`:''}</td>
+        <td>${r.tipo?`<span class="badge badge-muted" style="font-size:9px">${esc(str(r.tipo))}</span>`:''}</td>
       </tr>`).join('')}</tbody></table>`
     :'<div class="empty">Sin registros con estos filtros</div>';
 }
@@ -684,7 +795,7 @@ function fmtNum(n){ return Math.round(n).toLocaleString('es-AR'); }
 function partesFecha(r){ const f=str(r.fecha); if(!f) return{y:null,m:null,d:null}; if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(f)){const[d,m,y]=f.split('/');return{y:+y,m:+m,d:+d};} if(/^\d{4}-\d{2}-\d{2}/.test(f)){const[y,m,d]=f.split('-');return{y:+y,m:+m,d:+d};} const dt=new Date(f); if(!isNaN(dt.getTime())) return{y:dt.getFullYear(),m:dt.getMonth()+1,d:dt.getDate()}; return{y:null,m:null,d:null}; }
 function fmtFecha(r){ const{y,m,d}=partesFecha(r); if(!y) return str(r.fecha)||'—'; return`${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`; }
 function fmtMonto(n){ if(isNaN(n)) return'—'; const a=Math.abs(n); if(a>=1000000) return(n/1000000).toFixed(2)+'M'; if(a>=1000) return n.toLocaleString('es-AR',{maximumFractionDigits:0}); return n.toFixed(2); }
-function sortRows(rows,col,dir){ return[...rows].sort((a,b)=>{ let va,vb; if(col==='fecha'){const fa=partesFecha(a),fb=partesFecha(b);va=(fa.y||0)*10000+(fa.m||0)*100+(fa.d||0);vb=(fb.y||0)*10000+(fb.m||0)*100+(fb.d||0);}else if(col==='monto'){va=parseFloat(a.monto)||0;vb=parseFloat(b.monto)||0;}else{va=str(a.descripcion).toLowerCase();vb=str(b.descripcion).toLowerCase();} if(va<vb) return dir==='asc'?-1:1; if(va>vb) return dir==='asc'?1:-1; return 0; }); }
+function sortRows(rows,col,dir){ return[...rows].sort((a,b)=>{ let va,vb; if(col==='fecha'){const fa=partesFecha(a),fb=partesFecha(b);va=(fa.y||0)*10000+(fa.m||0)*100+(fa.d||0);vb=(fb.y||0)*10000+(fb.m||0)*100+(fb.d||0);}else if(col==='monto'){va=parseFloat(a.monto)||0;vb=parseFloat(b.monto)||0;}else if(col==='en'){va=str(a.descripcion).toLowerCase();vb=str(b.descripcion).toLowerCase();}else if(col==='con'){va=str(a.medio_pago).toLowerCase();vb=str(b.medio_pago).toLowerCase();}else if(col==='cat'){va=str(a.categoria).toLowerCase();vb=str(b.categoria).toLowerCase();}else if(col==='tipo'){va=str(a.tipo).toLowerCase();vb=str(b.tipo).toLowerCase();}else{va=str(a.descripcion).toLowerCase();vb=str(b.descripcion).toLowerCase();} if(va<vb) return dir==='asc'?-1:1; if(va>vb) return dir==='asc'?1:-1; return 0; }); }
 function getSortDir(id,col){ const s=sortState[id]; if(!s||s.col!==col) return'desc'; return s.dir==='desc'?'asc':'desc'; }
 function setSortState(id,col,dir){ sortState[id]={col,dir}; }
 function sortIcon(id,col){ const s=sortState[id]; if(!s||s.col!==col) return'<span class="sort-icon">⇅</span>'; return`<span class="sort-icon active">${s.dir==='asc'?'↑':'↓'}</span>`; }
@@ -937,8 +1048,37 @@ function initEgFiltros(){
   document.getElementById('eg-hasta').value = now.toISOString().split('T')[0];
 }
 
-function buildEgCatsChecks(){
-  const wrap = document.getElementById('eg-cats-checks');
+// ── Multi-select helpers ──
+function toggleMultiSelect(msId){
+  const ms=document.getElementById(msId);
+  const btn=ms.querySelector('.multi-select-btn');
+  const dd=ms.querySelector('.multi-select-dropdown');
+  const isOpen=dd.classList.contains('show');
+  // Close all others first
+  document.querySelectorAll('.multi-select-dropdown.show').forEach(d=>{ d.classList.remove('show'); d.closest('.multi-select').querySelector('.multi-select-btn').classList.remove('open'); });
+  if(!isOpen){ dd.classList.add('show'); btn.classList.add('open'); }
+}
+function msSelectAll(msId){ document.querySelectorAll(`#${msId} .ms-cb`).forEach(cb=>cb.checked=true); updateMsLabel(msId); }
+function msSelectNone(msId){ document.querySelectorAll(`#${msId} .ms-cb`).forEach(cb=>cb.checked=false); updateMsLabel(msId); }
+function getMsSelected(msId){ return[...document.querySelectorAll(`#${msId} .ms-cb:checked`)].map(cb=>cb.value); }
+function getMsAll(msId){ return[...document.querySelectorAll(`#${msId} .ms-cb`)].map(cb=>cb.value); }
+function updateMsLabel(msId){
+  const all=getMsAll(msId).length;
+  const sel=getMsSelected(msId).length;
+  const labelEl=document.getElementById(msId.replace('-ms','-label'));
+  if(!labelEl) return;
+  const base=msId.includes('eg-cats')?'Cat. Destino':msId.includes('ig-cats')?'Cat. Origen':'Categorías';
+  labelEl.textContent=sel===all?`${base} (todas)`:sel===0?`${base} (ninguna)`:`${base} (${sel} de ${all})`;
+}
+// Close dropdowns on outside click
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.multi-select')){
+    document.querySelectorAll('.multi-select-dropdown.show').forEach(d=>{ d.classList.remove('show'); d.closest('.multi-select').querySelector('.multi-select-btn').classList.remove('open'); });
+  }
+});
+
+function buildEgCatsMultiSelect(){
+  const wrap = document.getElementById('eg-cats-options');
   if(!wrap || wrap.children.length > 0) return;
   const cats = [...new Set(
     allRows
@@ -947,16 +1087,17 @@ function buildEgCatsChecks(){
       .filter(c => c && c !== 'Cuenta Balance')
   )].sort();
   wrap.innerHTML = cats.map(c=>`
-    <label class="cred-check" style="flex:0 0 auto">
-      <input type="checkbox" class="ck-eg-cat" value="${c}" checked onchange="renderEgresos()">
-      <span style="width:8px;height:8px;border-radius:50%;background:${CAT_COLORS[c]||'#6b7280'};display:inline-block"></span>
+    <label class="ms-option">
+      <input type="checkbox" class="ms-cb" value="${c}" checked onchange="updateMsLabel('eg-cats-ms');renderEgresos()">
+      <span class="ms-dot" style="background:${CAT_COLORS[c]||'#6b7280'}"></span>
       ${c}
     </label>`).join('');
+  updateMsLabel('eg-cats-ms');
 }
 
 function renderEgresos(){
   initEgFiltros();
-  buildEgCatsChecks();
+  buildEgCatsMultiSelect();
 
   const desde  = document.getElementById('eg-desde').value;
   const hasta  = document.getElementById('eg-hasta').value;
@@ -967,9 +1108,7 @@ function renderEgresos(){
 
   const TARJETAS_CREDITO = ['visa santander','amex santander','amex pae'];
 
-  const catsActivas = new Set(
-    [...document.querySelectorAll('.ck-eg-cat:checked')].map(el=>el.value)
-  );
+  const catsActivas = new Set(getMsSelected('eg-cats-ms'));
 
   const meses = getMesesRango(desde, hasta);
   const dias  = meses.length * 30.4;
@@ -1082,6 +1221,203 @@ function renderEgChart(meses, byCatMes){
   }));
 
   egChart = new Chart(canvas,{
+    type:'bar',
+    data:{ labels:meses.map(fmtMesKey), datasets },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{ display:true, position:'bottom', labels:{ color:'#8a8d9a', font:{size:10}, boxWidth:10, padding:8 } }
+      },
+      scales:{
+        x:{ stacked:true, ticks:{color:'#8a8d9a',font:{size:10}}, grid:{color:'rgba(255,255,255,0.05)'} },
+        y:{ stacked:true, ticks:{color:'#8a8d9a',font:{size:10},callback:v=>'$'+fmtNum(v)}, grid:{color:'rgba(255,255,255,0.05)'} }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════
+// INGRESOS REALES
+// ══════════════════════════════════════════════
+let igChart = null;
+
+// Fallback hardcoded income accounts (from REGLAS_TIPO in Apps Script)
+const CUENTAS_INGRESO_FALLBACK = [
+  'AMEX PAE','Sueldo PAE','Cuenta de Gastos',
+  'Intereses MP','Intereses Calfpay','Rendimiento','Cashback',
+  'Venta Cruze','Venta Entradas','Venta Placas Video','Devolucion',
+  'Vision Bi','Negocio AxD'
+];
+
+const TIPO_COLORS = {
+  'Sueldo':            '#3b82f6',
+  'Ingreso Financiero':'#22c55e',
+  'Ingreso Venta':     '#f59e0b',
+  'Ingreso Propio':    '#8b5cf6',
+  'Cuenta Balance':    '#6b7280',
+  'Crédito':           '#ec4899',
+  'Activo':            '#06b6d4',
+  'TBD':               '#6b7280',
+};
+
+function getCuentasIngreso(){
+  // Dynamic from tablasCuentas if available
+  const dynamic = tablasCuentas
+    .filter(c => c.tipo_cuenta === 'Ingreso')
+    .map(c => c.nombre)
+    .filter((v,i,a) => a.indexOf(v)===i);
+  if(dynamic.length > 0) return dynamic;
+  return CUENTAS_INGRESO_FALLBACK;
+}
+
+function initIgFiltros(){
+  if(document.getElementById('ig-desde').value) return;
+  const now = new Date();
+  const desde = new Date(now.getFullYear(), now.getMonth()-5, 1);
+  document.getElementById('ig-desde').value = desde.toISOString().split('T')[0];
+  document.getElementById('ig-hasta').value = now.toISOString().split('T')[0];
+}
+
+function buildIgCatsMultiSelect(){
+  const wrap = document.getElementById('ig-cats-options');
+  if(!wrap || wrap.children.length > 0) return;
+  const ingresoCuentas = getCuentasIngreso().map(c=>c.toLowerCase());
+  const tipos = [...new Set(
+    allRows
+      .filter(r => ingresoCuentas.includes(str(r.medio_pago).toLowerCase()))
+      .map(r => str(r.tipo))
+      .filter(t => t)
+  )].sort();
+  wrap.innerHTML = tipos.map(t=>`
+    <label class="ms-option">
+      <input type="checkbox" class="ms-cb" value="${t}" checked onchange="updateMsLabel('ig-cats-ms');renderIngresos()">
+      <span class="ms-dot" style="background:${TIPO_COLORS[t]||'#6b7280'}"></span>
+      ${t}
+    </label>`).join('');
+  updateMsLabel('ig-cats-ms');
+}
+
+function renderIngresos(){
+  initIgFiltros();
+  buildIgCatsMultiSelect();
+
+  const desde = document.getElementById('ig-desde').value;
+  const hasta = document.getElementById('ig-hasta').value;
+  const ckARS = document.getElementById('ck-ig-ars').checked;
+  const ckUSD = document.getElementById('ck-ig-usd').checked;
+  const monedas = [...(ckARS?['ARS']:[]), ...(ckUSD?['USD']:[])];
+
+  const ingresoCuentas = getCuentasIngreso().map(c=>c.toLowerCase());
+  const tiposActivos = new Set(getMsSelected('ig-cats-ms'));
+
+  const meses = getMesesRango(desde, hasta);
+  const dias  = meses.length * 30.4;
+
+  // Filtrar: CON es una cuenta de ingreso
+  const rows = allRows.filter(r=>{
+    const f = partesFecha(r); if(!f.y) return false;
+    const fd = `${f.y}-${String(f.m).padStart(2,'0')}-${String(f.d||1).padStart(2,'0')}`;
+    if(desde && fd < desde) return false;
+    if(hasta && fd > hasta) return false;
+    const mon = str(r.moneda)||'ARS';
+    if(!monedas.includes(mon)) return false;
+    const con = str(r.medio_pago).toLowerCase();
+    if(!ingresoCuentas.includes(con)) return false;
+    const tipo = str(r.tipo);
+    if(tipo && !tiposActivos.has(tipo)) return false;
+    return true;
+  });
+
+  // KPIs (ARS)
+  const totalARS = rows.filter(r=>!str(r.moneda)||str(r.moneda)==='ARS').reduce((s,r)=>s+(parseFloat(r.monto)||0),0);
+  document.getElementById('ig-total').textContent = '$'+fmtNum(totalARS);
+  document.getElementById('ig-mes').textContent   = '$'+fmtNum(totalARS/(meses.length||1));
+  document.getElementById('ig-sem').textContent   = '$'+fmtNum(totalARS/(dias/7||1));
+  document.getElementById('ig-dia').textContent   = '$'+fmtNum(totalARS/(dias||1));
+
+  // Agrupar por tipo x mes (chart) y por CON x mes (tabla)
+  const byTipoMes = {}; // { tipo: { mesKey: total } }
+  const byCONMes  = {}; // { con: { tipo, meses: { mesKey: total } } }
+
+  rows.filter(r=>!str(r.moneda)||str(r.moneda)==='ARS').forEach(r=>{
+    const tipo = str(r.tipo)||'TBD';
+    const con  = str(r.medio_pago)||'(sin CON)';
+    const f    = partesFecha(r);
+    if(!f.y) return;
+    const key  = `${f.y}-${String(f.m).padStart(2,'0')}`;
+    const monto = parseFloat(r.monto)||0;
+
+    // Por tipo
+    if(!byTipoMes[tipo]) byTipoMes[tipo]={};
+    byTipoMes[tipo][key] = (byTipoMes[tipo][key]||0) + monto;
+
+    // Por CON
+    const conKey = `${con}|||${tipo}`;
+    if(!byCONMes[conKey]) byCONMes[conKey]={con, tipo, meses:{}};
+    byCONMes[conKey].meses[key] = (byCONMes[conKey].meses[key]||0) + monto;
+  });
+
+  // ── Chart ──
+  renderIgChart(meses, byTipoMes);
+
+  // ── Tabla por CON ──
+  if(!meses.length){
+    document.getElementById('ig-tabla-wrap').innerHTML='<div class="empty">Sin datos</div>';
+    return;
+  }
+
+  const consSorted = Object.values(byCONMes).sort((a,b)=>{
+    const ta=Object.values(a.meses).reduce((s,v)=>s+v,0);
+    const tb=Object.values(b.meses).reduce((s,v)=>s+v,0);
+    return tb-ta;
+  });
+
+  const mesHeaders = meses.map(k=>`<th>${fmtMesKey(k)}</th>`).join('');
+
+  const rows2 = consSorted.map(({con,tipo,meses:mesObj})=>{
+    const vals  = meses.map(k=>mesObj[k]||0);
+    const total = vals.reduce((a,v)=>a+v,0);
+    const nonZ  = vals.filter(v=>v>0);
+    const prom  = nonZ.length ? total/nonZ.length : 0;
+    const max   = nonZ.length ? Math.max(...nonZ) : 0;
+    const min   = nonZ.length ? Math.min(...nonZ) : 0;
+    const dot   = `<span style="width:7px;height:7px;border-radius:50%;background:${TIPO_COLORS[tipo]||'#6b7280'};display:inline-block;margin-right:5px"></span>`;
+    return `<tr>
+      <td style="white-space:nowrap">${dot}${esc(con)}<br><span style="font-size:10px;color:var(--muted)">${esc(tipo)}</span></td>
+      ${vals.map(v=>`<td class="td-mono">${v?'$'+fmtNum(v):'-'}</td>`).join('')}
+      <td class="td-mono" style="color:var(--muted)">$${fmtNum(prom)}</td>
+      <td class="td-mono" style="color:var(--muted)">$${fmtNum(total/(dias||1))}</td>
+      <td class="td-mono" style="color:var(--green)">$${fmtNum(max)}</td>
+      <td class="td-mono" style="color:var(--danger)">$${fmtNum(min)}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('ig-tabla-wrap').innerHTML=`<table>
+    <thead><tr>
+      <th>Fuente / Tipo</th>
+      ${mesHeaders}
+      <th>Prom.</th><th>x día</th><th>Máx</th><th>Mín</th>
+    </tr></thead>
+    <tbody>${rows2||'<tr><td colspan="'+(meses.length+5)+'"><div class="empty">Sin datos</div></td></tr>'}</tbody>
+  </table>`;
+}
+
+function renderIgChart(meses, byTipoMes){
+  const canvas = document.getElementById('igChart');
+  if(!canvas) return;
+  if(igChart){ igChart.destroy(); igChart=null; }
+  if(!meses.length) return;
+
+  const tipos = Object.keys(byTipoMes).sort();
+  const datasets = tipos.map(tipo=>({
+    label: tipo,
+    data: meses.map(k=>Math.round(byTipoMes[tipo][k]||0)),
+    backgroundColor: TIPO_COLORS[tipo]||'#6b7280',
+    borderRadius: 3,
+    borderSkipped: false,
+  }));
+
+  igChart = new Chart(canvas,{
     type:'bar',
     data:{ labels:meses.map(fmtMesKey), datasets },
     options:{
