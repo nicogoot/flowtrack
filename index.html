@@ -15,7 +15,23 @@
   --accent:#00d4aa;--danger:#ff4757;--warn:#ffa502;--green:#2ed573;
   --font:'DM Sans',system-ui,sans-serif;--mono:'DM Mono','Fira Code',monospace;
   --r:12px;--r2:8px;
+  /* STAGING: variables del ambiente de prueba */
+  --staging-orange:#ff8c42;
+  --staging-beige:#d4a574;
 }
+/* STAGING: banda superior indicando ambiente no productivo (solo visible con .staging-mode en body) */
+.staging-banner{display:none;}
+.staging-mode .staging-banner{
+  display:block;position:sticky;top:0;z-index:200;background:var(--staging-orange);
+  color:#1a1b20;text-align:center;font-size:11px;font-weight:700;
+  letter-spacing:1px;padding:4px 8px;text-transform:uppercase;
+  border-bottom:2px solid var(--staging-beige);
+}
+/* STAGING: topbar con borde naranja y logo resaltado */
+.staging-mode .topbar{top:22px;border-bottom:1px solid var(--staging-orange);}
+.staging-mode .topbar-logo{color:var(--staging-orange);}
+.staging-mode .topbar-logo::after{content:' [DEV]';color:var(--staging-beige);font-size:11px;font-weight:500;}
+.staging-mode .tabnav{top:79px;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;-webkit-font-smoothing:antialiased}
 button{cursor:pointer;font-family:inherit;border:none;outline:none}
@@ -51,6 +67,26 @@ input,select,textarea{font-family:inherit;outline:none}
 .form-label{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
 .form-control{width:100%;padding:10px 12px;border-radius:var(--r2);background:var(--card);border:1px solid var(--border);color:var(--text);font-size:14px;transition:border .15s}
 .form-control:focus{border-color:var(--accent)}
+/* FIX 5: highlight visual en fecha sospechosa */
+.form-control.fecha-warning{background:#3a2d1a;border-color:var(--warn);border-width:2px;}
+.form-control.fecha-danger{background:#3a1f1a;border-color:var(--danger);border-width:2px;}
+.fecha-warning-label{font-size:11px;color:var(--warn);margin-top:4px;display:none;}
+.fecha-danger-label{font-size:11px;color:var(--danger);margin-top:4px;display:none;font-weight:600;}
+.fecha-warning-label.show, .fecha-danger-label.show{display:block;}
+/* FIX 5: modal de confirmación condicional */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.active{display:flex;}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;max-width:420px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.5);}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:8px;color:var(--warn);}
+.modal-subtitle{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.4;}
+.modal-detail{background:var(--card2);border-radius:var(--r2);padding:12px;margin-bottom:16px;font-size:13px;}
+.modal-detail-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);}
+.modal-detail-row:last-child{border-bottom:none;}
+.modal-detail-label{color:var(--muted);}
+.modal-detail-value{color:var(--text);font-weight:500;text-align:right;}
+.modal-detail-value.highlight{color:var(--warn);font-weight:600;}
+.modal-actions{display:flex;gap:8px;}
+.modal-actions .btn{flex:1;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 textarea.form-control{resize:vertical;min-height:70px}
 select.form-control{cursor:pointer}
@@ -171,6 +207,8 @@ td{padding:8px 10px;color:var(--text)}
 </style>
 </head>
 <body>
+<!-- STAGING: banner de ambiente de prueba -->
+<div class="staging-banner">⚠ Ambiente de prueba — los cambios se guardan en el Sheet real</div>
 <div id="app">
 
   <div class="topbar">
@@ -198,7 +236,11 @@ td{padding:8px 10px;color:var(--text)}
       <label class="form-label">Describí tu transacción</label>
       <textarea class="form-control" id="txInput" rows="3" placeholder="ej: 15000 super con visa&#10;ej: cobré 800 mil de Vision BI en Santander&#10;ej: compré 200 USDT a 1480 desde Buenbit"></textarea>
     </div>
-    <button class="btn btn-primary" id="btnProcesar" onclick="procesarTx()">✨ Procesar con IA</button>
+    <!-- FIX 7b: botones de procesar con IA + carga manual como alternativa -->
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary" id="btnProcesar" onclick="procesarTx()" style="flex:2">✨ Procesar con IA</button>
+      <button class="btn btn-secondary" onclick="cargarManual()" style="flex:1">✍️ Manual</button>
+    </div>
     <div id="groq-loader" class="loader" style="display:none"><span class="spinner"></span>Procesando…</div>
     <div id="form-resultado" style="display:none;margin-top:16px">
       <div class="divider"></div>
@@ -206,7 +248,9 @@ td{padding:8px 10px;color:var(--text)}
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Fecha</label>
-          <input type="date" class="form-control" id="f-fecha">
+          <input type="date" class="form-control" id="f-fecha" onchange="chequearFechaUI()">
+          <div class="fecha-warning-label" id="f-fecha-warn">⚠️ Fecha de mes anterior — confirmá al guardar</div>
+          <div class="fecha-danger-label" id="f-fecha-danger">🚨 Fecha de AÑO distinto al actual — revisá con cuidado</div>
         </div>
         <div class="form-group">
           <label class="form-label">Monto</label>
@@ -243,6 +287,11 @@ td{padding:8px 10px;color:var(--text)}
           <label class="form-label">Cuotas</label>
           <input type="number" class="form-control" id="f-cuotas" min="1">
         </div>
+      </div>
+      <!-- FIX 6: aviso cuando Groq detecta que hay una segunda tx implícita -->
+      <div id="aviso-segunda-tx" style="display:none;background:#2a2416;border:1px solid var(--warn);border-radius:var(--r2);padding:10px 12px;margin-bottom:12px;font-size:13px;line-height:1.4;color:var(--text);">
+        <div style="font-weight:600;color:var(--warn);margin-bottom:4px;">📌 Detecté una operación compuesta</div>
+        <div style="color:var(--muted);">Guardá primero esta transacción y cargá la complementaria después. Ejemplo: compra de USD → guardar egreso ARS ahora, ingreso USD en la siguiente carga.</div>
       </div>
       <button class="btn btn-primary" id="btnGuardar" onclick="guardarTx()">💾 Guardar en Sheets</button>
       <div style="height:8px"></div>
@@ -457,6 +506,19 @@ td{padding:8px 10px;color:var(--text)}
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- FIX 5: modal de confirmación condicional para fechas sospechosas -->
+<div class="modal-overlay" id="modal-confirmar">
+  <div class="modal-box">
+    <div class="modal-title">⚠️ Confirmá la fecha</div>
+    <div class="modal-subtitle" id="modal-mensaje">La fecha de esta transacción no es del mes actual. Revisá el detalle antes de guardar.</div>
+    <div class="modal-detail" id="modal-detail"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="cancelarGuardado()">Cancelar y revisar</button>
+      <button class="btn btn-primary" onclick="confirmarGuardado()">Confirmar y guardar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 let allRows=[], tablasCuentas=[], tablasCategorias=[], tablasTipos=[];
 let config={}, tasas={}, sortState={}, trackerPeriod='mes';
@@ -496,21 +558,45 @@ function showTab(id){
   if(id==='ingresos')  renderIngresos();
 }
 
-async function syncSheet(){ const b=document.getElementById('btnSync'); b.style.animation='spin .7s linear infinite'; setSyncDot('loading'); await cargarSheet(); b.style.animation=''; }
+async function syncSheet(){
+  const b=document.getElementById('btnSync');
+  b.style.animation='spin .7s linear infinite';
+  setSyncDot('loading');
+  await cargarSheet();
+  /* FIX 4: re-renderizar la pestaña activa para que los datos nuevos se vean sin cambiar de tab */
+  const tabActiva=TABS.find(t=>document.getElementById('panel-'+t)?.classList.contains('active'));
+  if(tabActiva==='historial') renderHistorial();
+  else if(tabActiva==='tracker') renderTracker();
+  else if(tabActiva==='creditos') renderCreditos();
+  else if(tabActiva==='egresos') renderEgresos();
+  else if(tabActiva==='ingresos') renderIngresos();
+  b.style.animation='';
+}
 
 async function cargarSheet(){
   const url=config.scriptUrl;
   if(!url){ showToast('Configurá la URL del Script ⚙️'); return; }
-  try{
-    const r=await fetch(url+'?action=read');
-    const d=await r.json();
-    if(d.status==='ok'){ allRows=d.rows||[]; poblarFiltros(); showToast(`${allRows.length} filas ✓`); setSyncDot('ok'); }
-  } catch(e){ showToast('Error al cargar'); setSyncDot('err'); }
-  try{
-    const r2=await fetch(url+'?action=cuentas');
-    const d2=await r2.json();
-    if(d2.status==='ok'){ tablasCuentas=d2.cuentas||[]; tablasCategorias=d2.categorias||[]; tablasTipos=d2.tipos||[]; poblarDropdowns(); }
-  } catch(e){}
+  /* FIX 3: fetches en paralelo con Promise.allSettled — baja ~40% el tiempo de carga inicial.
+     Usamos allSettled y no all para que si un endpoint falla, el otro igual entregue sus datos. */
+  const [resRead, resCuentas]=await Promise.allSettled([
+    fetch(url+'?action=read').then(r=>r.json()),
+    fetch(url+'?action=cuentas').then(r=>r.json())
+  ]);
+  if(resRead.status==='fulfilled' && resRead.value.status==='ok'){
+    allRows=resRead.value.rows||[];
+    poblarFiltros();
+    showToast(`${allRows.length} filas ✓`);
+    setSyncDot('ok');
+  } else {
+    showToast('Error al cargar filas');
+    setSyncDot('err');
+  }
+  if(resCuentas.status==='fulfilled' && resCuentas.value.status==='ok'){
+    tablasCuentas=resCuentas.value.cuentas||[];
+    tablasCategorias=resCuentas.value.categorias||[];
+    tablasTipos=resCuentas.value.tipos||[];
+    poblarDropdowns();
+  }
 }
 
 function poblarFiltros(){
@@ -560,35 +646,75 @@ async function procesarTx(){
   document.getElementById('btnProcesar').disabled=true;
   document.getElementById('form-resultado').style.display='none';
   const hoy=new Date().toISOString().split('T')[0];
+  /* FIX 1: anclas temporales adicionales para que Groq no invente años */
+  const añoActual=new Date().getFullYear();
   const listaEN=tablasCuentas.filter(c=>c.tipo_cuenta==='Egreso'||c.tipo_cuenta==='Balance').map(c=>c.nombre).filter((v,i,a)=>a.indexOf(v)===i).sort().join(', ')||'Super, Verduleria, Alquiler, Spotify...';
   const listaCON=tablasCuentas.filter(c=>c.tipo_cuenta==='Ingreso'||c.tipo_cuenta==='Balance').map(c=>c.nombre).filter((v,i,a)=>a.indexOf(v)===i).sort().join(', ')||'Visa Santander, MP, Efectivo, Santander...';
   const listaCat=[...new Set(tablasCategorias.map(c=>c.categoria).filter(c=>c&&c!=='TBD'))].sort().join(', ')||'Alimentación, Vivienda, Movilidad, Salidas, Suscripciones, Viajes, Ocio, Compras Tech, Compras Personales, Regalos, Mascotas, Activos Adquiridos, Evangelista, Varios / TBD';
-  const prompt=`Sos un asistente de finanzas personales argentino. Extraé los datos y respondé SOLO con JSON array válido sin texto ni markdown.
+  const prompt=`Sos un asistente de finanzas personales argentino. Extraé los datos y respondé SOLO con JSON válido sin texto ni markdown.
 
 Transacción: "${txt}"
 
-REGLAS CRÍTICAS:
+CONTEXTO TEMPORAL (CRÍTICO):
+- Hoy es ${hoy}. Año actual: ${añoActual}.
+- Si el usuario menciona solo día y mes (ej: "15 de abril", "el 3"), asumí año ${añoActual}.
+- Si el usuario dice "ayer", "anteayer", "hace X días", calculá la fecha relativa a ${hoy}.
+- Si el usuario dice un día de la semana (ej: "el viernes"), asumí el más reciente que YA pasó respecto a ${hoy}.
+- Si la fecha resultante queda más de 7 días EN EL FUTURO respecto a ${hoy}, restale 1 año.
+- La fecha NUNCA puede ser más de 7 días en el futuro.
+- Formato de salida OBLIGATORIO: YYYY-MM-DD con año de 4 dígitos.
+
+REGLAS DE DATOS:
 1. EN = destino del dinero. CON = origen del dinero.
 2. Usá EXACTAMENTE los nombres de las listas. Sin cambiar tildes ni mayúsculas.
 3. Si el nombre se parece a uno de la lista aunque esté mal escrito, usá el de la lista.
 4. Monto SIEMPRE positivo.
-5. Compra de activos (USD, USDT, BTC, NVDA, ETF, etc.): generá DOS objetos. Primera: egreso de la moneda que pagás. Segunda: ingreso del activo.
-6. Sin fecha → ${hoy}. Moneda default: ARS.
+5. Sin fecha → ${hoy}. Moneda default: ARS.
+6. SIEMPRE devolvé UNA SOLA transacción. NUNCA devuelvas dos. Si detectás compra de activos (USD, USDT, BTC, NVDA, ETF, etc.), transferencia entre cuentas, o devolución, devolvé SOLO la transacción principal mencionada y marcá "requiere_segunda_tx": true.
+7. Para compra de activos: la transacción principal es el EGRESO de la moneda que pagás (ej: "compré 100 USD a 1480 desde Buenbit" → monto=148000, moneda=ARS, descripcion=USD, medio_pago=Buenbit).
+8. Para devoluciones: la transacción principal es el INGRESO del monto devuelto (EN = cuenta que recibe, CON = comercio que devuelve).
 
 Nombres válidos para EN: ${listaEN}
 Nombres válidos para CON: ${listaCON}
 Categorías válidas: ${listaCat}
 
-Respondé con JSON array (1 o 2 elementos):
-[{"fecha":"YYYY-MM-DD","monto":0,"moneda":"ARS","descripcion":"nombre exacto EN","medio_pago":"nombre exacto CON","categoria":"categoría exacta","comentario":"","cuota":null,"cuotas":null}]`;
+Respondé con JSON OBJECT (no array):
+{"fecha":"YYYY-MM-DD","monto":0,"moneda":"ARS","descripcion":"nombre exacto EN","medio_pago":"nombre exacto CON","categoria":"categoría exacta","comentario":"","cuota":null,"cuotas":null,"requiere_segunda_tx":false}`;
   try{
     const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],temperature:0.1,max_tokens:500})});
+    /* FIX 7a: manejo robusto de errores HTTP de Groq */
+    if(!res.ok){
+      let msg='Error con Groq';
+      if(res.status===429) msg='Límite de Groq alcanzado — carga manual habilitada';
+      else if(res.status===401) msg='API key de Groq inválida — verificá en Config';
+      else if(res.status>=500) msg='Groq fuera de servicio — carga manual habilitada';
+      else msg=`Error Groq (${res.status}) — carga manual habilitada`;
+      showToast(msg);
+      cargarManual();
+      return;
+    }
     const d=await res.json();
-    const raw=d.choices?.[0]?.message?.content||'[]';
+    const raw=d?.choices?.[0]?.message?.content;
+    if(!raw){
+      showToast('Respuesta vacía de Groq — carga manual habilitada');
+      cargarManual();
+      return;
+    }
     const clean=raw.replace(/```json|```/g,'').trim();
-    const txs=JSON.parse(clean);
-    const tx=Array.isArray(txs)?txs[0]:txs;
-    window._pendingTx2=(Array.isArray(txs)&&txs.length>1)?txs[1]:null;
+    /* FIX 6: Groq ahora devuelve 1 sola transacción (object). Por retrocompat, si devuelve array, tomamos el primero. */
+    let tx;
+    try{
+      tx=JSON.parse(clean);
+      if(Array.isArray(tx)) tx=tx[0]||{};
+      if(!tx || typeof tx!=='object') throw new Error('JSON inesperado');
+    } catch(parseErr){
+      console.error('[procesarTx] JSON inválido de Groq:', clean);
+      showToast('Groq devolvió algo raro — carga manual habilitada');
+      cargarManual();
+      return;
+    }
+    /* FIX 1: sanitización defensiva de fecha por si Groq ignora el prompt */
+    if(tx.fecha) tx.fecha=sanitizarFecha(tx.fecha);
     document.getElementById('f-fecha').value=tx.fecha||hoy;
     document.getElementById('f-monto').value=tx.monto||'';
     document.getElementById('f-moneda').value=tx.moneda||'ARS';
@@ -598,14 +724,75 @@ Respondé con JSON array (1 o 2 elementos):
     document.getElementById('f-cuota').value=tx.cuota||'';
     document.getElementById('f-cuotas').value=tx.cuotas||'';
     document.getElementById('form-resultado').style.display='block';
-    if(window._pendingTx2) showToast('⚡ 2 transacciones detectadas');
-  } catch(e){ showToast('Error con Groq'); console.error(e); }
+    /* FIX 5: chequear UI de fecha inmediatamente después de autocompletar */
+    chequearFechaUI();
+    /* FIX 6: aviso cuando Groq detecta que hay una segunda tx implícita */
+    if(tx.requiere_segunda_tx){
+      mostrarAvisoSegundaTx();
+    }
+  } catch(e){
+    /* FIX 7a: error de red o inesperado — fallback a carga manual */
+    console.error('[procesarTx] error inesperado:', e);
+    showToast('Error de red con Groq — carga manual habilitada');
+    cargarManual();
+  }
   finally{ document.getElementById('groq-loader').style.display='none'; document.getElementById('btnProcesar').disabled=false; }
+}
+
+/* FIX 7b: abre el formulario vacío para carga manual, sin llamar a Groq */
+function cargarManual(){
+  const hoy=new Date().toISOString().split('T')[0];
+  document.getElementById('f-fecha').value=hoy;
+  document.getElementById('f-monto').value='';
+  document.getElementById('f-moneda').value='ARS';
+  document.getElementById('f-en').value='';
+  document.getElementById('f-con').value='';
+  document.getElementById('f-comentario').value='';
+  document.getElementById('f-cuota').value='';
+  document.getElementById('f-cuotas').value='';
+  document.getElementById('form-resultado').style.display='block';
+  ocultarAvisoSegundaTx();
+  chequearFechaUI();
+  document.getElementById('f-monto').focus();
+}
+
+/* FIX 6: aviso discreto cuando se detecta compra de activos / devolución / transferencia */
+function mostrarAvisoSegundaTx(){
+  const div=document.getElementById('aviso-segunda-tx');
+  if(div) div.style.display='block';
+}
+function ocultarAvisoSegundaTx(){
+  const div=document.getElementById('aviso-segunda-tx');
+  if(div) div.style.display='none';
 }
 
 async function guardarTx(){
   const url=config.scriptUrl;
   if(!url){ showToast('Configurá la URL del Script ⚙️'); return; }
+  /* FIX 5: chequear fecha sospechosa ANTES de guardar; si lo es, popup de confirmación */
+  const fecha=document.getElementById('f-fecha').value;
+  const estado=chequearFechaSospechosa(fecha);
+  if(estado==='mes-anterior' || estado==='año-distinto'){
+    document.getElementById('btnGuardar').disabled=true;
+    _guardadoPendiente=_ejecutarGuardado;
+    mostrarModalConfirmacion(
+      fecha,
+      parseFloat(document.getElementById('f-monto').value)||0,
+      document.getElementById('f-moneda').value,
+      document.getElementById('f-en').value.trim(),
+      document.getElementById('f-con').value.trim(),
+      /* categoría no existe como input; se deriva en backend. Pasamos EN como hint para contexto visual. */
+      '(auto)',
+      estado
+    );
+    return;
+  }
+  /* Fecha OK (mes actual y año actual): guardar directo sin fricción */
+  await _ejecutarGuardado();
+}
+
+async function _ejecutarGuardado(){
+  const url=config.scriptUrl;
   document.getElementById('btnGuardar').disabled=true;
   setSyncDot('loading');
   const fila=[
@@ -622,10 +809,7 @@ async function guardarTx(){
     '','',
   ];
   const rows=[fila];
-  if(window._pendingTx2){
-    const t=window._pendingTx2;
-    rows.push([t.fecha||fila[0],t.monto||0,t.moneda||'ARS',t.descripcion||'',t.comentario||'',t.medio_pago||'','',t.categoria||'Activos Adquiridos','','','','']);
-  }
+  /* FIX 6: ya no hay _pendingTx2, siempre 1 sola transacción por vez */
   try{
     // no-cors: Apps Script acepta esto, no podemos leer la respuesta pero los datos se guardan
     await fetch(url, {
@@ -643,7 +827,6 @@ async function guardarTx(){
     console.error(e);
   } finally{
     document.getElementById('btnGuardar').disabled=false;
-    window._pendingTx2=null;
   }
 }
 
@@ -660,7 +843,7 @@ function jsonpPost(url, payload){
   });
 }
 
-function resetForm(){ document.getElementById('txInput').value=''; document.getElementById('form-resultado').style.display='none'; window._pendingTx2=null; }
+function resetForm(){ document.getElementById('txInput').value=''; document.getElementById('form-resultado').style.display='none'; ocultarAvisoSegundaTx(); }
 
 function renderHistorial(){
   let rows=allRows;
@@ -790,6 +973,101 @@ function renderTracker(){
 function toggleCat(h){ const it=h.closest('.cat-item'); const was=it.classList.contains('open'); document.querySelectorAll('.cat-item').forEach(i=>i.classList.remove('open')); if(!was) it.classList.add('open'); }
 
 function str(v){ return String(v||'').trim(); }
+
+/* FIX 1: sanitiza fechas mal parseadas por la IA — si quedan muy en el pasado/futuro, las acerca al año actual */
+function sanitizarFecha(f){
+  if(!f || typeof f!=='string') return f;
+  const m=f.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m) return f;
+  const [_,yStr,mmStr,ddStr]=m;
+  const año=parseInt(yStr), mes=parseInt(mmStr), dia=parseInt(ddStr);
+  const hoy=new Date();
+  const añoActual=hoy.getFullYear();
+  /* Si el año está a más de 1 año de distancia del actual, corregilo al año actual */
+  if(Math.abs(año-añoActual)>1){
+    const mmFix=String(mes).padStart(2,'0'), ddFix=String(dia).padStart(2,'0');
+    console.warn(`[sanitizarFecha] año ${año} sospechoso, corrigiendo a ${añoActual}`);
+    return `${añoActual}-${mmFix}-${ddFix}`;
+  }
+  /* Si la fecha resultante queda a más de 7 días en el futuro, restar 1 año */
+  const fechaObj=new Date(f);
+  const diffDias=(fechaObj-hoy)/(1000*60*60*24);
+  if(diffDias>7){
+    const mmFix=String(mes).padStart(2,'0'), ddFix=String(dia).padStart(2,'0');
+    console.warn(`[sanitizarFecha] fecha futura sospechosa, restando 1 año`);
+    return `${año-1}-${mmFix}-${ddFix}`;
+  }
+  return f;
+}
+
+/* FIX 5: clasifica si una fecha es sospechosa para disparar highlight y/o popup */
+function chequearFechaSospechosa(fecha){
+  if(!fecha || typeof fecha!=='string') return 'ok';
+  const m=fecha.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m) return 'ok';
+  const año=parseInt(m[1]), mes=parseInt(m[2]);
+  const hoy=new Date();
+  const añoActual=hoy.getFullYear();
+  const mesActual=hoy.getMonth()+1;
+  if(año!==añoActual) return 'año-distinto';
+  if(mes<mesActual) return 'mes-anterior';
+  return 'ok';
+}
+
+/* FIX 5: aplica estilos visuales al campo fecha según sospecha */
+function chequearFechaUI(){
+  const input=document.getElementById('f-fecha');
+  const warnLabel=document.getElementById('f-fecha-warn');
+  const dangerLabel=document.getElementById('f-fecha-danger');
+  if(!input) return;
+  const estado=chequearFechaSospechosa(input.value);
+  input.classList.remove('fecha-warning','fecha-danger');
+  warnLabel?.classList.remove('show');
+  dangerLabel?.classList.remove('show');
+  if(estado==='mes-anterior'){
+    input.classList.add('fecha-warning');
+    warnLabel?.classList.add('show');
+  } else if(estado==='año-distinto'){
+    input.classList.add('fecha-danger');
+    dangerLabel?.classList.add('show');
+  }
+}
+
+/* FIX 5: estado del modal de confirmación y callbacks */
+let _guardadoPendiente=null;
+function confirmarGuardado(){
+  document.getElementById('modal-confirmar').classList.remove('active');
+  if(_guardadoPendiente){
+    const fn=_guardadoPendiente;
+    _guardadoPendiente=null;
+    fn();
+  }
+}
+function cancelarGuardado(){
+  document.getElementById('modal-confirmar').classList.remove('active');
+  _guardadoPendiente=null;
+  document.getElementById('btnGuardar').disabled=false;
+  setSyncDot('ok');
+  document.getElementById('f-fecha').focus();
+}
+function mostrarModalConfirmacion(fecha, monto, moneda, en, con, categoria, estado){
+  const det=document.getElementById('modal-detail');
+  const [y,m,d]=fecha.split('-');
+  const fechaFmt=`${d}/${m}/${y}`;
+  const mensaje=document.getElementById('modal-mensaje');
+  if(estado==='año-distinto'){
+    mensaje.textContent=`⚠ La fecha es de OTRO AÑO (${y}). Si es correcto, confirmá. Si no, cancelá y corregí.`;
+  } else {
+    mensaje.textContent=`La fecha es de un mes anterior al actual. Revisá el detalle antes de guardar.`;
+  }
+  det.innerHTML=`
+    <div class="modal-detail-row"><span class="modal-detail-label">Fecha</span><span class="modal-detail-value highlight">${fechaFmt}</span></div>
+    <div class="modal-detail-row"><span class="modal-detail-label">Monto</span><span class="modal-detail-value">${fmtNum(monto)} ${moneda}</span></div>
+    <div class="modal-detail-row"><span class="modal-detail-label">EN (destino)</span><span class="modal-detail-value">${esc(en)||'—'}</span></div>
+    <div class="modal-detail-row"><span class="modal-detail-label">CON (origen)</span><span class="modal-detail-value">${esc(con)||'—'}</span></div>
+    <div class="modal-detail-row"><span class="modal-detail-label">Categoría</span><span class="modal-detail-value">${esc(categoria)||'—'}</span></div>`;
+  document.getElementById('modal-confirmar').classList.add('active');
+}
 function esc(s){ const d=document.createElement('div'); d.textContent=str(s); return d.innerHTML; }
 function fmtNum(n){ return Math.round(n).toLocaleString('es-AR'); }
 function partesFecha(r){ const f=str(r.fecha); if(!f) return{y:null,m:null,d:null}; if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(f)){const[d,m,y]=f.split('/');return{y:+y,m:+m,d:+d};} if(/^\d{4}-\d{2}-\d{2}/.test(f)){const[y,m,d]=f.split('-');return{y:+y,m:+m,d:+d};} const dt=new Date(f); if(!isNaN(dt.getTime())) return{y:dt.getFullYear(),m:dt.getMonth()+1,d:dt.getDate()}; return{y:null,m:null,d:null}; }
