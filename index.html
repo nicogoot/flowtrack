@@ -87,6 +87,86 @@ input,select,textarea{font-family:inherit;outline:none}
 .modal-detail-value.highlight{color:var(--warn);font-weight:600;}
 .modal-actions{display:flex;gap:8px;}
 .modal-actions .btn{flex:1;}
+/* FIX 8: subtabs dentro de Config */
+.subtabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:8px;overflow-x:auto;scrollbar-width:none;}
+.subtabs::-webkit-scrollbar{display:none;}
+.subtab{flex:0 0 auto;padding:6px 12px;border-radius:16px;font-size:12px;font-weight:500;background:transparent;color:var(--muted);border:1px solid transparent;white-space:nowrap;}
+.subtab.active{background:var(--card);color:var(--text);border-color:var(--border2);}
+.subpanel{display:none;}
+.subpanel.active{display:block;}
+/* FIX 8: pendientes — lista de EN para clasificar */
+.pend-row{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.pend-info{flex:1;min-width:0;}
+.pend-name{font-size:14px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pend-stats{font-size:11px;color:var(--muted);margin-top:2px;}
+.pend-select{flex:0 0 140px;font-size:12px;padding:6px 8px;border-radius:var(--r2);background:var(--card2);border:1px solid var(--border);color:var(--text);}
+.pend-select.changed{background:#1a3a2d;border-color:var(--green);}
+.pend-empty{padding:24px;text-align:center;color:var(--muted);font-size:13px;}
+.pend-summary{font-size:13px;color:var(--muted);margin-bottom:12px;}
+.pend-summary b{color:var(--accent);}
+/* FIX 9: pestaña Patrimonio */
+.pn-resumen{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;}
+.pn-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.pn-total{font-size:26px;font-weight:600;color:var(--text);line-height:1.1;margin-bottom:2px;}
+.pn-total-alt{font-size:13px;color:var(--muted);margin-bottom:12px;}
+.pn-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.pn-card{background:var(--card2);border-radius:var(--r2);padding:8px 10px;}
+.pn-card-danger{background:#3a1f1f;}
+.pn-card-label{font-size:11px;color:var(--muted);}
+.pn-card-danger .pn-card-label{color:var(--danger);}
+.pn-card-value{font-size:15px;font-weight:600;color:var(--text);margin-top:2px;}
+.pn-card-danger .pn-card-value{color:var(--danger);}
+.pn-flujos{font-size:12px;color:var(--muted);padding-top:9px;border-top:1px solid var(--border);}
+.pn-flujos .up{color:var(--green);}
+.pn-flujos .down{color:#ff8c42;}
+.pn-filtros{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.pn-fecha{flex:1;min-width:130px;font-size:12px;padding:7px 9px;border-radius:var(--r2);background:var(--card);border:1px solid var(--border);color:var(--text);}
+.pn-moneda-toggle{display:flex;gap:3px;}
+.pn-moneda-btn{font-size:11px;padding:7px 12px;border-radius:var(--r2);background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-weight:500;}
+.pn-moneda-btn.active{background:var(--accent);color:#0a0c10;border-color:var(--accent);}
+.pn-bloque{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;}
+.pn-bloque-titulo{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;}
+/* FIX 10: header con título y total a la derecha */
+.pn-bloque-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.pn-bloque-header-titulo{font-size:14px;font-weight:600;color:var(--text);}
+.pn-bloque-header-total{font-size:13px;font-weight:600;color:var(--accent);}
+.pn-bloque-header-total.danger{color:var(--danger);}
+.pn-subtabla{margin-bottom:14px;}
+.pn-subtabla-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.pn-subtabla-titulo{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+.pn-subtabla-total{font-size:12px;font-weight:600;color:var(--text);}
+.pn-subtabla-total.danger{color:var(--danger);}
+.pn-tabla-wrap{overflow-x:auto;}
+.pn-tabla{width:100%;font-size:12px;border-collapse:collapse;}
+.pn-tabla th{text-align:left;padding:5px 4px;color:var(--muted);font-weight:400;font-size:11px;border-bottom:1px solid var(--border);}
+.pn-tabla th.num{text-align:right;}
+.pn-tabla td{padding:7px 4px;border-bottom:1px solid var(--border);color:var(--text);}
+.pn-tabla td.num{text-align:right;font-variant-numeric:tabular-nums;}
+.pn-tabla td.up{color:var(--green);}
+.pn-tabla td.down{color:#ff8c42;}
+.pn-tabla td.danger{color:var(--danger);font-weight:600;}
+.pn-tabla td.bal{font-weight:600;}
+.pn-tabla tr.subtotal{background:var(--card2);font-weight:600;}
+.pn-tabla tr.subtotal td{padding:8px 4px;}
+.pn-mon-tag{font-size:10px;color:var(--muted);margin-left:6px;font-weight:400;}
+.pn-warn{color:var(--warn);font-size:11px;}
+.pn-empty{padding:14px;text-align:center;color:var(--muted);font-size:12px;}
+
+/* FIX 12: widget última carga */
+.ultima-carga{margin-top:12px;background:var(--card);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;}
+.ultima-carga-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;user-select:none;transition:background .15s;}
+.ultima-carga-header:hover{background:var(--card2);}
+.ultima-carga-resumen{font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ultima-carga-resumen .uc-label{color:var(--muted);margin-right:6px;}
+.ultima-carga-resumen .uc-monto{color:var(--accent);font-weight:600;}
+.ultima-carga-toggle{font-size:14px;color:var(--muted);margin-left:8px;flex-shrink:0;transition:transform .2s;}
+.ultima-carga.expanded .ultima-carga-toggle{transform:rotate(180deg);}
+.ultima-carga-detalle{display:none;padding:0 12px 10px 12px;border-top:1px solid var(--border);}
+.ultima-carga.expanded .ultima-carga-detalle{display:block;}
+.uc-row{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;border-bottom:1px solid var(--border);}
+.uc-row:last-child{border-bottom:none;}
+.uc-key{color:var(--muted);}
+.uc-val{color:var(--text);font-weight:500;text-align:right;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 textarea.form-control{resize:vertical;min-height:70px}
 select.form-control{cursor:pointer}
@@ -223,6 +303,7 @@ td{padding:8px 10px;color:var(--text)}
   <nav class="tabnav">
     <button class="tab active" onclick="showTab('cargar')"   id="tab-cargar">📝 Cargar</button>
     <button class="tab"        onclick="showTab('historial')" id="tab-historial">📋 Historial</button>
+    <button class="tab"        onclick="showTab('patrimonio')" id="tab-patrimonio">🏦 Patrimonio</button>
     <button class="tab"        onclick="showTab('tracker')"   id="tab-tracker">📊 Tracker</button>
     <button class="tab"        onclick="showTab('creditos')"  id="tab-creditos">💳 Créditos</button>
     <button class="tab"        onclick="showTab('egresos')"   id="tab-egresos">💸 Egresos</button>
@@ -242,6 +323,15 @@ td{padding:8px 10px;color:var(--text)}
       <button class="btn btn-secondary" onclick="cargarManual()" style="flex:1">✍️ Manual</button>
     </div>
     <div id="groq-loader" class="loader" style="display:none"><span class="spinner"></span>Procesando…</div>
+
+    <!-- FIX 12: widget "última carga" — sutil, debajo de los botones de acción -->
+    <div id="ultima-carga-widget" class="ultima-carga" style="display:none;">
+      <div class="ultima-carga-header" onclick="toggleUltimaCarga()">
+        <div class="ultima-carga-resumen" id="ultima-carga-resumen">—</div>
+        <div class="ultima-carga-toggle" id="ultima-carga-toggle">▾</div>
+      </div>
+      <div class="ultima-carga-detalle" id="ultima-carga-detalle"></div>
+    </div>
     <div id="form-resultado" style="display:none;margin-top:16px">
       <div class="divider"></div>
       <div class="card-title" style="margin-bottom:12px">Confirmá los datos</div>
@@ -287,11 +377,6 @@ td{padding:8px 10px;color:var(--text)}
           <label class="form-label">Cuotas</label>
           <input type="number" class="form-control" id="f-cuotas" min="1">
         </div>
-      </div>
-      <!-- FIX 6: aviso cuando Groq detecta que hay una segunda tx implícita -->
-      <div id="aviso-segunda-tx" style="display:none;background:#2a2416;border:1px solid var(--warn);border-radius:var(--r2);padding:10px 12px;margin-bottom:12px;font-size:13px;line-height:1.4;color:var(--text);">
-        <div style="font-weight:600;color:var(--warn);margin-bottom:4px;">📌 Detecté una operación compuesta</div>
-        <div style="color:var(--muted);">Guardá primero esta transacción y cargá la complementaria después. Ejemplo: compra de USD → guardar egreso ARS ahora, ingreso USD en la siguiente carga.</div>
       </div>
       <button class="btn btn-primary" id="btnGuardar" onclick="guardarTx()">💾 Guardar en Sheets</button>
       <div style="height:8px"></div>
@@ -473,33 +558,103 @@ td{padding:8px 10px;color:var(--text)}
 
   </div>
 
+  <!-- PATRIMONIO (FIX 9 + FIX 10) -->
+  <div class="panel" id="panel-patrimonio">
+    <!-- Resumen ejecutivo (sigue afectado por filtro ARS/USD) -->
+    <div class="pn-resumen" id="pn-resumen">
+      <div class="pn-label">Patrimonio neto</div>
+      <div class="pn-total" id="pn-total">—</div>
+      <div class="pn-total-alt" id="pn-total-alt">—</div>
+      <div class="pn-cards">
+        <div class="pn-card"><div class="pn-card-label">Líquido</div><div class="pn-card-value" id="pn-sub-liquido">—</div></div>
+        <div class="pn-card"><div class="pn-card-label">Inversiones</div><div class="pn-card-value" id="pn-sub-inversiones">—</div></div>
+        <div class="pn-card pn-card-danger"><div class="pn-card-label">Deuda</div><div class="pn-card-value" id="pn-sub-pasivos">—</div></div>
+      </div>
+      <div class="pn-flujos" id="pn-flujos">—</div>
+    </div>
+
+    <!-- Filtros (ARS/USD afecta SOLO al resumen ejecutivo) -->
+    <div class="pn-filtros">
+      <input type="date" class="pn-fecha" id="pn-desde">
+      <input type="date" class="pn-fecha" id="pn-hasta">
+      <div class="pn-moneda-toggle" title="Filtra solo el resumen ejecutivo de arriba">
+        <button class="pn-moneda-btn active" id="pn-mon-ars" onclick="setPNMoneda('ARS')">ARS</button>
+        <button class="pn-moneda-btn" id="pn-mon-usd" onclick="setPNMoneda('USD')">USD</button>
+      </div>
+      <button class="pn-moneda-btn" onclick="refrescarPN()" title="Refrescar saldos iniciales y movimientos desde el Sheet">↻</button>
+    </div>
+
+    <!-- Bloques se generan dinámicamente desde JS -->
+    <div id="pn-bloque-liquido"></div>
+    <div id="pn-bloque-inversiones"></div>
+    <div id="pn-bloque-pasivos"></div>
+  </div>
+
   <!-- CONFIG -->
   <div class="panel" id="panel-config">
-    <div class="config-section">
-      <div class="config-title">🔗 Conexión</div>
-      <div class="form-group">
-        <label class="form-label">URL Apps Script</label>
-        <input type="url" class="form-control" id="cfg-script-url" placeholder="https://script.google.com/...">
-      </div>
-      <div class="form-group">
-        <label class="form-label">API Key Groq</label>
-        <input type="password" class="form-control" id="cfg-groq-key" placeholder="gsk_...">
-      </div>
-      <button class="btn btn-primary" onclick="guardarConfig()">Guardar conexión</button>
+    <!-- FIX 8: sub-pestañas dentro de Config -->
+    <div class="subtabs">
+      <button class="subtab active" onclick="showSubtab('conexion')" id="subtab-conexion">🔗 Conexión</button>
+      <button class="subtab" onclick="showSubtab('pendientes')" id="subtab-pendientes">🏷️ Pendientes</button>
+      <button class="subtab" onclick="showSubtab('tasas')" id="subtab-tasas">💱 Tasas</button>
+      <button class="subtab" onclick="showSubtab('mantenimiento')" id="subtab-mantenimiento">🔧 Mantenimiento</button>
     </div>
-    <div class="config-section" style="margin-top:16px">
-      <div class="config-title">💱 Tasas de cambio</div>
-      <div class="config-row"><span class="config-key">USD → ARS</span><input type="number" class="config-input" id="tc-usd-ars"></div>
-      <div class="config-row"><span class="config-key">USDT → USD</span><input type="number" class="config-input" id="tc-usdt-usd"></div>
-      <div class="config-row"><span class="config-key">BTC → USD</span><input type="number" class="config-input" id="tc-btc-usd"></div>
-      <div class="config-row"><span class="config-key">PAXG → USD</span><input type="number" class="config-input" id="tc-paxg-usd"></div>
-      <div class="config-row"><span class="config-key">NVDA → USD</span><input type="number" class="config-input" id="tc-nvda-usd"></div>
-      <div class="config-row"><span class="config-key">AGRO → USD</span><input type="number" class="config-input" id="tc-agro-usd"></div>
-      <div class="config-row"><span class="config-key">PAMP → USD</span><input type="number" class="config-input" id="tc-pamp-usd"></div>
-      <div class="config-row"><span class="config-key">SMCI → USD</span><input type="number" class="config-input" id="tc-smci-usd"></div>
-      <div class="config-row"><span class="config-key">GTLB → USD</span><input type="number" class="config-input" id="tc-gtlb-usd"></div>
-      <div style="height:10px"></div>
-      <button class="btn btn-primary" onclick="guardarTasas()">Guardar tasas</button>
+
+    <!-- Subpanel: Conexión -->
+    <div class="subpanel active" id="subpanel-conexion">
+      <div class="config-section">
+        <div class="config-title">🔗 Conexión</div>
+        <div class="form-group">
+          <label class="form-label">URL Apps Script</label>
+          <input type="url" class="form-control" id="cfg-script-url" placeholder="https://script.google.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">API Key Groq</label>
+          <input type="password" class="form-control" id="cfg-groq-key" placeholder="gsk_...">
+        </div>
+        <button class="btn btn-primary" onclick="guardarConfig()">Guardar conexión</button>
+      </div>
+    </div>
+
+    <!-- Subpanel: Pendientes (FIX 8 — clasificar EN sin categoría) -->
+    <div class="subpanel" id="subpanel-pendientes">
+      <div class="config-section">
+        <div class="config-title">🏷️ Clasificar pendientes</div>
+        <div class="pend-summary" id="pend-summary">Cargando…</div>
+        <div id="pend-list"></div>
+        <div style="height:8px"></div>
+        <button class="btn btn-primary" id="btn-guardar-pendientes" onclick="guardarPendientes()" style="display:none;">Guardar clasificaciones</button>
+      </div>
+    </div>
+
+    <!-- Subpanel: Tasas -->
+    <div class="subpanel" id="subpanel-tasas">
+      <div class="config-section">
+        <div class="config-title">💱 Tasas de cambio</div>
+        <div class="config-row"><span class="config-key">USD → ARS</span><input type="number" class="config-input" id="tc-usd-ars"></div>
+        <div class="config-row"><span class="config-key">USDT → USD</span><input type="number" class="config-input" id="tc-usdt-usd"></div>
+        <div class="config-row"><span class="config-key">BTC → USD</span><input type="number" class="config-input" id="tc-btc-usd"></div>
+        <div class="config-row"><span class="config-key">PAXG → USD</span><input type="number" class="config-input" id="tc-paxg-usd"></div>
+        <div class="config-row"><span class="config-key">NVDA → USD</span><input type="number" class="config-input" id="tc-nvda-usd"></div>
+        <div class="config-row"><span class="config-key">AGRO → USD</span><input type="number" class="config-input" id="tc-agro-usd"></div>
+        <div class="config-row"><span class="config-key">PAMP → USD</span><input type="number" class="config-input" id="tc-pamp-usd"></div>
+        <div class="config-row"><span class="config-key">SMCI → USD</span><input type="number" class="config-input" id="tc-smci-usd"></div>
+        <div class="config-row"><span class="config-key">GTLB → USD</span><input type="number" class="config-input" id="tc-gtlb-usd"></div>
+        <div style="height:10px"></div>
+        <button class="btn btn-primary" onclick="guardarTasas()">Guardar tasas</button>
+      </div>
+    </div>
+
+    <!-- Subpanel: Mantenimiento (FIX 8 — botón regenerar tablas) -->
+    <div class="subpanel" id="subpanel-mantenimiento">
+      <div class="config-section">
+        <div class="config-title">🔧 Mantenimiento del sistema</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:12px;">
+          Las tablas de referencia (Cuentas, Categorías, Tipos) se regeneran a partir de tus movimientos. Antes esto pasaba en cada carga (causaba lentitud). Ahora lo disparás vos cuando lo necesites: típicamente <b>después de cargar muchos gastos nuevos</b> o si agregaste cuentas/categorías nuevas que no aparecen en los dropdowns.
+        </div>
+        <button class="btn btn-primary" id="btn-regenerar" onclick="regenerarTablas()">⚙️ Regenerar tablas de referencia</button>
+        <div id="regenerar-result" style="font-size:12px;color:var(--muted);margin-top:8px;"></div>
+      </div>
     </div>
   </div>
 
@@ -519,12 +674,25 @@ td{padding:8px 10px;color:var(--text)}
   </div>
 </div>
 
+<!-- FIX 8: modal de confirmación de propagación de categorías -->
+<div class="modal-overlay" id="modal-propagacion">
+  <div class="modal-box">
+    <div class="modal-title">📊 Confirmar clasificación</div>
+    <div class="modal-subtitle" id="modal-prop-mensaje">Vas a aplicar estas categorías a las filas históricas también.</div>
+    <div class="modal-detail" id="modal-prop-detail"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="cancelarPropagacion()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarPropagacion()">Sí, aplicar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 let allRows=[], tablasCuentas=[], tablasCategorias=[], tablasTipos=[];
 let config={}, tasas={}, sortState={}, trackerPeriod='mes';
 const MESES=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-window.addEventListener('DOMContentLoaded',()=>{ cargarConfig(); cargarTasas(); cargarSheet(); });
+window.addEventListener('DOMContentLoaded',()=>{ cargarConfig(); cargarTasas(); cargarSheet().then(()=>actualizarUltimaCarga()); });
 
 function cargarConfig(){
   config=JSON.parse(localStorage.getItem('ft_config')||'{}');
@@ -548,7 +716,7 @@ function guardarTasas(){
   showToast('Tasas guardadas ✓');
 }
 
-const TABS=['cargar','historial','tracker','creditos','egresos','ingresos','config'];
+const TABS=['cargar','historial','patrimonio','tracker','creditos','egresos','ingresos','config'];
 function showTab(id){
   TABS.forEach(t=>{ document.getElementById('panel-'+t).classList.toggle('active',t===id); const b=document.getElementById('tab-'+t); if(b) b.classList.toggle('active',t===id); });
   if(id==='historial') renderHistorial();
@@ -556,6 +724,7 @@ function showTab(id){
   if(id==='creditos')  renderCreditos();
   if(id==='egresos')   renderEgresos();
   if(id==='ingresos')  renderIngresos();
+  if(id==='patrimonio') renderPatrimonio();
 }
 
 async function syncSheet(){
@@ -570,6 +739,7 @@ async function syncSheet(){
   else if(tabActiva==='creditos') renderCreditos();
   else if(tabActiva==='egresos') renderEgresos();
   else if(tabActiva==='ingresos') renderIngresos();
+  else if(tabActiva==='patrimonio') renderPatrimonio();
   b.style.animation='';
 }
 
@@ -597,6 +767,8 @@ async function cargarSheet(){
     tablasTipos=resCuentas.value.tipos||[];
     poblarDropdowns();
   }
+  /* FIX 12: actualizar widget última carga */
+  actualizarUltimaCarga();
 }
 
 function poblarFiltros(){
@@ -670,16 +842,14 @@ REGLAS DE DATOS:
 3. Si el nombre se parece a uno de la lista aunque esté mal escrito, usá el de la lista.
 4. Monto SIEMPRE positivo.
 5. Sin fecha → ${hoy}. Moneda default: ARS.
-6. SIEMPRE devolvé UNA SOLA transacción. NUNCA devuelvas dos. Si detectás compra de activos (USD, USDT, BTC, NVDA, ETF, etc.), transferencia entre cuentas, o devolución, devolvé SOLO la transacción principal mencionada y marcá "requiere_segunda_tx": true.
-7. Para compra de activos: la transacción principal es el EGRESO de la moneda que pagás (ej: "compré 100 USD a 1480 desde Buenbit" → monto=148000, moneda=ARS, descripcion=USD, medio_pago=Buenbit).
-8. Para devoluciones: la transacción principal es el INGRESO del monto devuelto (EN = cuenta que recibe, CON = comercio que devuelve).
+6. SIEMPRE devolvé UNA SOLA transacción. NUNCA devuelvas dos.
 
 Nombres válidos para EN: ${listaEN}
 Nombres válidos para CON: ${listaCON}
 Categorías válidas: ${listaCat}
 
 Respondé con JSON OBJECT (no array):
-{"fecha":"YYYY-MM-DD","monto":0,"moneda":"ARS","descripcion":"nombre exacto EN","medio_pago":"nombre exacto CON","categoria":"categoría exacta","comentario":"","cuota":null,"cuotas":null,"requiere_segunda_tx":false}`;
+{"fecha":"YYYY-MM-DD","monto":0,"moneda":"ARS","descripcion":"nombre exacto EN","medio_pago":"nombre exacto CON","categoria":"categoría exacta","comentario":"","cuota":null,"cuotas":null}`;
   try{
     const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],temperature:0.1,max_tokens:500})});
     /* FIX 7a: manejo robusto de errores HTTP de Groq */
@@ -726,10 +896,6 @@ Respondé con JSON OBJECT (no array):
     document.getElementById('form-resultado').style.display='block';
     /* FIX 5: chequear UI de fecha inmediatamente después de autocompletar */
     chequearFechaUI();
-    /* FIX 6: aviso cuando Groq detecta que hay una segunda tx implícita */
-    if(tx.requiere_segunda_tx){
-      mostrarAvisoSegundaTx();
-    }
   } catch(e){
     /* FIX 7a: error de red o inesperado — fallback a carga manual */
     console.error('[procesarTx] error inesperado:', e);
@@ -751,26 +917,29 @@ function cargarManual(){
   document.getElementById('f-cuota').value='';
   document.getElementById('f-cuotas').value='';
   document.getElementById('form-resultado').style.display='block';
-  ocultarAvisoSegundaTx();
   chequearFechaUI();
   document.getElementById('f-monto').focus();
-}
-
-/* FIX 6: aviso discreto cuando se detecta compra de activos / devolución / transferencia */
-function mostrarAvisoSegundaTx(){
-  const div=document.getElementById('aviso-segunda-tx');
-  if(div) div.style.display='block';
-}
-function ocultarAvisoSegundaTx(){
-  const div=document.getElementById('aviso-segunda-tx');
-  if(div) div.style.display='none';
 }
 
 async function guardarTx(){
   const url=config.scriptUrl;
   if(!url){ showToast('Configurá la URL del Script ⚙️'); return; }
-  /* FIX 5: chequear fecha sospechosa ANTES de guardar; si lo es, popup de confirmación */
+
   const fecha=document.getElementById('f-fecha').value;
+  const cuotaInicial=parseInt(document.getElementById('f-cuota').value)||1;
+  const totalCuotas=parseInt(document.getElementById('f-cuotas').value)||1;
+  const cuotasAGenerar=Math.max(0, totalCuotas - cuotaInicial + 1);
+
+  /* FIX 11: si hay más de 1 cuota a generar, mostrar modal específico de cuotas
+     (no el de fecha sospechosa, porque esas fechas futuras son legítimas). */
+  if(cuotasAGenerar > 1){
+    document.getElementById('btnGuardar').disabled=true;
+    _guardadoPendiente=_ejecutarGuardado;
+    mostrarModalCuotas(fecha, cuotaInicial, totalCuotas, cuotasAGenerar);
+    return;
+  }
+
+  /* FIX 5: chequear fecha sospechosa SOLO si no hay cuotas a generar */
   const estado=chequearFechaSospechosa(fecha);
   if(estado==='mes-anterior' || estado==='año-distinto'){
     document.getElementById('btnGuardar').disabled=true;
@@ -781,7 +950,6 @@ async function guardarTx(){
       document.getElementById('f-moneda').value,
       document.getElementById('f-en').value.trim(),
       document.getElementById('f-con').value.trim(),
-      /* categoría no existe como input; se deriva en backend. Pasamos EN como hint para contexto visual. */
       '(auto)',
       estado
     );
@@ -791,25 +959,71 @@ async function guardarTx(){
   await _ejecutarGuardado();
 }
 
+/* FIX 11: modal específico para confirmación de cuotas auto-generadas */
+function mostrarModalCuotas(fechaBase, cuotaInicial, totalCuotas, cuotasAGenerar){
+  const en=document.getElementById('f-en').value.trim();
+  const monto=parseFloat(document.getElementById('f-monto').value)||0;
+  const moneda=document.getElementById('f-moneda').value;
+  /* Calcular fecha de la última cuota a generar */
+  const offsetUltima=cuotasAGenerar-1;
+  const fechaUltima=offsetUltima===0 ? fechaBase : sumarMesesPreservandoDia(fechaBase, offsetUltima);
+  const [yU,mU,dU]=fechaUltima.split('-');
+  const fechaUltimaFmt=`${dU}/${mU}/${yU}`;
+  const [yB,mB,dB]=fechaBase.split('-');
+  const fechaBaseFmt=`${dB}/${mB}/${yB}`;
+  const totalMonto=monto*cuotasAGenerar;
+
+  const det=document.getElementById('modal-detail');
+  document.querySelector('#modal-confirmar .modal-title').textContent='💳 Confirmar cuotas';
+  document.getElementById('modal-mensaje').innerHTML=
+    `Se van a generar <b>${cuotasAGenerar} filas</b> en el Sheet, una por cada cuota desde la <b>cuota ${cuotaInicial}</b> hasta la <b>cuota ${totalCuotas}</b>.`;
+  det.innerHTML=`
+    <div class="modal-detail-row"><span class="modal-detail-label">Concepto</span><span class="modal-detail-value">${esc(en)||'—'}</span></div>
+    <div class="modal-detail-row"><span class="modal-detail-label">Monto por cuota</span><span class="modal-detail-value">${fmtNum(monto)} ${moneda}</span></div>
+    <div class="modal-detail-row"><span class="modal-detail-label">Total a pagar</span><span class="modal-detail-value highlight">${fmtNum(totalMonto)} ${moneda}</span></div>
+    <div class="modal-detail-row"><span class="modal-detail-label">Primera cuota</span><span class="modal-detail-value">${fechaBaseFmt}</span></div>
+    <div class="modal-detail-row"><span class="modal-detail-label">Última cuota</span><span class="modal-detail-value highlight">${fechaUltimaFmt}</span></div>`;
+  document.getElementById('modal-confirmar').classList.add('active');
+}
+
 async function _ejecutarGuardado(){
   const url=config.scriptUrl;
   document.getElementById('btnGuardar').disabled=true;
   setSyncDot('loading');
-  const fila=[
-    document.getElementById('f-fecha').value,
-    parseFloat(document.getElementById('f-monto').value)||0,
-    document.getElementById('f-moneda').value,
-    document.getElementById('f-en').value.trim(),
-    document.getElementById('f-comentario').value.trim(),
-    document.getElementById('f-con').value.trim(),
-    '',
-    '',
-    document.getElementById('f-cuota').value||'',
-    document.getElementById('f-cuotas').value||'',
-    '','',
-  ];
-  const rows=[fila];
-  /* FIX 6: ya no hay _pendingTx2, siempre 1 sola transacción por vez */
+
+  /* FIX 11: leer datos del form una sola vez */
+  const fechaBase=document.getElementById('f-fecha').value;
+  const monto=parseFloat(document.getElementById('f-monto').value)||0;
+  const moneda=document.getElementById('f-moneda').value;
+  const en=document.getElementById('f-en').value.trim();
+  const comentario=document.getElementById('f-comentario').value.trim();
+  const con=document.getElementById('f-con').value.trim();
+  const cuotaInicial=parseInt(document.getElementById('f-cuota').value)||1;
+  const totalCuotas=parseInt(document.getElementById('f-cuotas').value)||1;
+
+  /* FIX 11: si totalCuotas > 1, generar todas las cuotas automáticamente.
+     Cuota 1 mantiene fecha original; cada siguiente suma 1 mes preservando el día.
+     Ejemplo: 6 cuotas desde 2 mayo → 2 jun / 2 jul / 2 ago / 2 sep / 2 nov */
+  const rows=[];
+  const cuotasAGenerar=Math.max(1, totalCuotas);
+  for(let i=cuotaInicial; i<=cuotasAGenerar; i++){
+    const offset=i-cuotaInicial; /* 0 para la primera cuota a generar */
+    const fechaCuota=offset===0 ? fechaBase : sumarMesesPreservandoDia(fechaBase, offset);
+    rows.push([
+      fechaCuota,
+      monto,
+      moneda,
+      en,
+      comentario,
+      con,
+      '',
+      '',
+      i,
+      totalCuotas,
+      '','',
+    ]);
+  }
+
   try{
     // no-cors: Apps Script acepta esto, no podemos leer la respuesta pero los datos se guardan
     await fetch(url, {
@@ -820,6 +1034,17 @@ async function _ejecutarGuardado(){
     });
     showToast(`✓ ${rows.length} guardada(s)`);
     setSyncDot('ok');
+    /* FIX 12: agregar las filas guardadas a allRows local para actualizar widget al instante.
+       Mapeo del array al objeto que usa el frontend (mismo shape que action=read devuelve). */
+    rows.forEach(r => {
+      allRows.push({
+        fecha: r[0]||'', monto: r[1]||0, moneda: r[2]||'ARS',
+        descripcion: r[3]||'', comentario: r[4]||'', medio_pago: r[5]||'',
+        tipo: r[6]||'', categoria: r[7]||'',
+        cuota: r[8]||'', cuotas: r[9]||''
+      });
+    });
+    actualizarUltimaCarga();
     resetForm();
   } catch(e){
     showToast('Error al guardar');
@@ -843,7 +1068,7 @@ function jsonpPost(url, payload){
   });
 }
 
-function resetForm(){ document.getElementById('txInput').value=''; document.getElementById('form-resultado').style.display='none'; ocultarAvisoSegundaTx(); }
+function resetForm(){ document.getElementById('txInput').value=''; document.getElementById('form-resultado').style.display='none'; }
 
 function renderHistorial(){
   let rows=allRows;
@@ -895,6 +1120,7 @@ function renderTablaHistorial(rows,col='fecha',dir='desc'){
         <th class="sortable" onclick="setSortState('h','con',getSortDir('h','con'));renderTablaHistorial(window._hRows||[])">CON${sortIcon('h','con')}</th>
         <th class="sortable" onclick="setSortState('h','cat',getSortDir('h','cat'));renderTablaHistorial(window._hRows||[])">Categoría Destino${sortIcon('h','cat')}</th>
         <th class="sortable" onclick="setSortState('h','tipo',getSortDir('h','tipo'));renderTablaHistorial(window._hRows||[])">Categoría Origen${sortIcon('h','tipo')}</th>
+        <th>Comentario</th>
       </tr></thead><tbody>${s.map(r=>`<tr>
         <td class="td-mono td-muted" style="white-space:nowrap">${esc(fmtFecha(r))}</td>
         <td class="td-mono">${esc(fmtMonto(parseFloat(r.monto)||0))}</td>
@@ -903,6 +1129,7 @@ function renderTablaHistorial(rows,col='fecha',dir='desc'){
         <td class="td-muted">${esc(str(r.medio_pago))}</td>
         <td>${r.categoria?`<span class="badge badge-muted" style="font-size:9px">${esc(str(r.categoria))}</span>`:''}</td>
         <td>${r.tipo?`<span class="badge badge-muted" style="font-size:9px">${esc(str(r.tipo))}</span>`:''}</td>
+        <td class="td-muted" style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(str(r.comentario))}">${esc(str(r.comentario))}</td>
       </tr>`).join('')}</tbody></table>`
     :'<div class="empty">Sin registros con estos filtros</div>';
 }
@@ -974,6 +1201,22 @@ function toggleCat(h){ const it=h.closest('.cat-item'); const was=it.classList.c
 
 function str(v){ return String(v||'').trim(); }
 
+/* FIX 11: suma N meses a una fecha preservando el día.
+   Si el día no existe en el mes destino (ej: 31 de febrero), usa el último día del mes.
+   Ejemplos: 2 mayo + 1 mes = 2 junio; 31 enero + 1 mes = 28 (o 29) feb */
+function sumarMesesPreservandoDia(fechaStr, n){
+  const m=fechaStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m) return fechaStr;
+  const y=parseInt(m[1]), mes=parseInt(m[2]), dia=parseInt(m[3]);
+  const target=new Date(y, mes-1+n, 1);
+  const ultimoDiaTarget=new Date(target.getFullYear(), target.getMonth()+1, 0).getDate();
+  const diaFinal=Math.min(dia, ultimoDiaTarget);
+  const yFinal=target.getFullYear();
+  const mesFinal=String(target.getMonth()+1).padStart(2,'0');
+  const dFinal=String(diaFinal).padStart(2,'0');
+  return `${yFinal}-${mesFinal}-${dFinal}`;
+}
+
 /* FIX 1: sanitiza fechas mal parseadas por la IA — si quedan muy en el pasado/futuro, las acerca al año actual */
 function sanitizarFecha(f){
   if(!f || typeof f!=='string') return f;
@@ -1037,6 +1280,8 @@ function chequearFechaUI(){
 let _guardadoPendiente=null;
 function confirmarGuardado(){
   document.getElementById('modal-confirmar').classList.remove('active');
+  /* FIX 11: restaurar título por defecto */
+  document.querySelector('#modal-confirmar .modal-title').textContent='⚠️ Confirmá la fecha';
   if(_guardadoPendiente){
     const fn=_guardadoPendiente;
     _guardadoPendiente=null;
@@ -1045,6 +1290,8 @@ function confirmarGuardado(){
 }
 function cancelarGuardado(){
   document.getElementById('modal-confirmar').classList.remove('active');
+  /* FIX 11: restaurar título por defecto */
+  document.querySelector('#modal-confirmar .modal-title').textContent='⚠️ Confirmá la fecha';
   _guardadoPendiente=null;
   document.getElementById('btnGuardar').disabled=false;
   setSyncDot('ok');
@@ -1713,6 +1960,841 @@ function renderIgChart(meses, byTipoMes){
 
 document.getElementById('txInput').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();procesarTx();} });
 
+/* ════════════════════════════════════════════════════════
+   FIX 12 — Widget "última carga"
+   Muestra la última fila del Sheet en la pestaña Cargar, debajo de los botones.
+   Asume que el Sheet conserva orden de inserción (sin reordenes manuales).
+   ════════════════════════════════════════════════════════ */
+
+function actualizarUltimaCarga(){
+  const widget = document.getElementById('ultima-carga-widget');
+  if(!widget) return;
+  if(!allRows || allRows.length === 0){
+    widget.style.display = 'none';
+    return;
+  }
+  /* Última fila = la última que devolvió el backend (orden natural del Sheet) */
+  const tx = allRows[allRows.length - 1];
+  if(!tx || (!tx.descripcion && !tx.medio_pago)){
+    widget.style.display = 'none';
+    return;
+  }
+
+  /* Resumen 1 línea */
+  const fechaFmt = formatearFechaCorta(tx.fecha);
+  const montoFmt = fmtNum(parseFloat(tx.monto)||0);
+  const moneda = String(tx.moneda||'ARS');
+  const en = String(tx.descripcion||'').trim() || '—';
+  const resumen = document.getElementById('ultima-carga-resumen');
+  resumen.innerHTML = `<span class="uc-label">Última:</span>${esc(fechaFmt)} · ${esc(en)} <span class="uc-monto">${montoFmt} ${moneda}</span>`;
+
+  /* Detalle expandido */
+  const detalle = document.getElementById('ultima-carga-detalle');
+  const con = String(tx.medio_pago||'').trim();
+  const cat = String(tx.categoria||'').trim();
+  const tipo = String(tx.tipo||'').trim();
+  const com = String(tx.comentario||'').trim();
+  const cuota = tx.cuota ? `${tx.cuota}/${tx.cuotas||'?'}` : '';
+  const filas = [
+    ['Fecha', fechaFmt],
+    ['Monto', `${montoFmt} ${moneda}`],
+    ['EN (destino)', en],
+    ['CON (origen)', con || '—'],
+    ['Categoría', cat || '—'],
+    ['Tipo', tipo || '—'],
+  ];
+  if(cuota) filas.push(['Cuota', cuota]);
+  if(com) filas.push(['Comentario', com]);
+  detalle.innerHTML = filas.map(([k,v]) =>
+    `<div class="uc-row"><span class="uc-key">${esc(k)}</span><span class="uc-val">${esc(v)}</span></div>`
+  ).join('');
+
+  widget.style.display = 'block';
+}
+
+function toggleUltimaCarga(){
+  const w = document.getElementById('ultima-carga-widget');
+  if(w) w.classList.toggle('expanded');
+}
+
+/* Helper: convierte fecha a formato corto dd/mm/yy */
+function formatearFechaCorta(fechaStr){
+  if(!fechaStr) return '—';
+  const s = String(fechaStr);
+  /* Formato YYYY-MM-DD */
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return `${m[3]}/${m[2]}/${m[1].slice(2)}`;
+  /* Formato DD/MM/YYYY */
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m) return `${m[1].padStart(2,'0')}/${m[2].padStart(2,'0')}/${m[3].slice(2)}`;
+  /* Caer a Date parsing */
+  const d = new Date(s);
+  if(!isNaN(d.getTime())){
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yy = String(d.getFullYear()).slice(2);
+    return `${dd}/${mm}/${yy}`;
+  }
+  return s;
+}
+
+/* ════════════════════════════════════════════════════════
+   FIX 9 — Pestaña Patrimonio (PN)
+   Calcula saldos por cuenta+moneda, separa Líquido / Inversiones / Pasivos
+   con filtros de fecha y moneda. Muestra resumen ejecutivo arriba.
+   ════════════════════════════════════════════════════════ */
+
+let pnMoneda = 'ARS';
+let pnSaldosIniciales = []; /* [{cuenta, moneda, saldo}] */
+/* FIX 9d: removido _pnSaldosCargados — ahora siempre se refresca al renderizar Patrimonio.
+   El costo es 1 fetch extra por re-render, pero garantiza datos frescos sin tener que recargar la app. */
+
+/* Cuentas de inversión (resto Balance = Líquido) */
+const CUENTAS_INVERSION = ['Buenbit','Binance','Lemon','IOL'];
+/* FIX 9b: whitelist temporal de cuentas Balance reales (líquido).
+   La hoja Cuentas tiene falsos positivos (Flores, Entradas, etc.) por la lógica
+   automática de generarTablas. Hasta resolver el modelo de edición de roles,
+   forzamos esta lista para el bloque Líquido. */
+const CUENTAS_LIQUIDAS = ['MP','Mercado Pago','Santander','Hipotecario','Buenbit','Binance','Lemon','IOL','Efectivo','Calfpay'];
+/* Nota: Buenbit aparece en ambas listas a propósito porque puede tener saldos en ARS/USD (líquido)
+   y en USDT/cripto (inversión). El bloque al que va cada fila se decide por moneda más abajo. */
+/* Activos cuya unidad nativa NO es ARS/USD — necesitan tasa para mostrar Saldo USD */
+const ACTIVOS_CON_TASA = {
+  'USDT':'tc-usdt-usd',
+  'BTC':'tc-btc-usd',
+  'PAXG':'tc-paxg-usd',
+  'NVDA':'tc-nvda-usd',
+  'AGRO':'tc-agro-usd',
+  'PAMP':'tc-pamp-usd',
+  'SMCI':'tc-smci-usd',
+  'GTLB':'tc-gtlb-usd',
+  'BABA':null /* sin tasa configurada → N/A */
+};
+
+function setPNMoneda(mon){
+  pnMoneda = mon;
+  document.getElementById('pn-mon-ars').classList.toggle('active', mon==='ARS');
+  document.getElementById('pn-mon-usd').classList.toggle('active', mon==='USD');
+  renderPatrimonio();
+}
+
+/* Cargar saldos iniciales una vez al entrar a la pestaña */
+async function cargarSaldosIniciales(){
+  /* FIX 9d: siempre refrescar (sin cache) para que cambios en el Sheet aparezcan al instante */
+  const url = config.scriptUrl;
+  if(!url) return;
+  try{
+    const r = await fetch(url + '?action=saldos');
+    const d = await r.json();
+    if(d.status==='ok') pnSaldosIniciales = d.rows || [];
+  } catch(e){ console.error('Error saldos iniciales:', e); }
+}
+
+/* Helper: tasa de cambio de una moneda hacia USD */
+function tasaAUSD(moneda){
+  const m = String(moneda||'').toUpperCase();
+  if(m==='USD') return 1;
+  if(m==='ARS'){
+    const t = parseFloat(tasas['usd-ars'])||0;
+    return t > 0 ? (1/t) : 0; /* 1 ARS = 1/tasa USD */
+  }
+  /* Activos */
+  const tasaKey = ACTIVOS_CON_TASA[m];
+  if(tasaKey === null) return null; /* sin tasa configurada → N/A */
+  if(!tasaKey) return null;
+  const cleanKey = tasaKey.replace('tc-',''); /* tc-usdt-usd → usdt-usd */
+  const t = parseFloat(tasas[cleanKey])||0;
+  return t > 0 ? t : null;
+}
+
+/* Conversor a moneda elegida (ARS o USD) */
+function convertirA(monto, monedaOrigen, monedaDestino){
+  if(!monto) return 0;
+  const t = tasaAUSD(monedaOrigen);
+  if(t===null) return null;
+  const enUSD = monto * t;
+  if(monedaDestino==='USD') return enUSD;
+  /* ARS */
+  const usdArs = parseFloat(tasas['usd-ars'])||0;
+  return usdArs > 0 ? enUSD * usdArs : null;
+}
+
+/* Setear fechas por defecto del filtro: mes corriente */
+function inicializarFiltrosPN(){
+  const hoy = new Date();
+  const desde = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  const hasta = hoy;
+  const fmt = d => d.toISOString().split('T')[0];
+  const inputDesde = document.getElementById('pn-desde');
+  const inputHasta = document.getElementById('pn-hasta');
+  if(!inputDesde.value) inputDesde.value = fmt(desde);
+  if(!inputHasta.value) inputHasta.value = fmt(hasta);
+  /* Listeners para re-render */
+  inputDesde.onchange = renderPatrimonio;
+  inputHasta.onchange = renderPatrimonio;
+}
+
+/* Detectar a qué bloque pertenece una fila (cuenta + moneda):
+   - Si cuenta NO está en whitelist de líquidas → descartar (no es cuenta real)
+   - Si rol = Crédito → pasivo
+   - Si moneda es ARS o USD → líquido
+   - Si moneda es otra (USDT, BTC, NVDA, etc.) → inversión */
+function bloqueDeFila(nombreCuenta, moneda){
+  /* Crédito tiene prioridad — chequeo por rol porque las tarjetas son confiables en tablasCuentas */
+  if(esCuentaCredito(nombreCuenta)) return 'pasivo';
+  /* Si no está en la whitelist de líquidas, descartar */
+  if(CUENTAS_LIQUIDAS.indexOf(nombreCuenta) < 0) return null;
+  /* Por moneda */
+  const m = String(moneda||'').toUpperCase();
+  if(m === 'ARS' || m === 'USD') return 'liquido';
+  return 'inversion';
+}
+
+/* Conjunto de cuentas Balance (que tienen movimientos en ambas direcciones) */
+function esCuentaBalance(nombreCuenta){
+  const info = tablasCuentas.find(c => c.nombre === nombreCuenta);
+  if(!info) return false;
+  const rol = String(info.tipo_cuenta||'').toLowerCase();
+  return rol === 'balance';
+}
+
+/* Conjunto de tarjetas de crédito.
+   FIX 9c: detección por whitelist + lookup en tablasTipos (no en tablasCuentas).
+   Razón: la hoja Cuentas clasifica mal a las tarjetas porque solo aparecen en CON
+   (mientras que "Pago Visa Santander" aparece en EN como nombre distinto, no se cruzan).
+   La hoja Tipos sí las marca como "Crédito" gracias a REGLAS_TIPO. */
+const TARJETAS_CREDITO = ['Visa Santander', 'AMEX Santander'];
+function esCuentaCredito(nombreCuenta){
+  /* Camino B: whitelist hardcoded — siempre gana */
+  if(TARJETAS_CREDITO.indexOf(nombreCuenta) >= 0) return true;
+  /* Camino A: lookup en tablasTipos (campo medio_pago) */
+  const tipo = tablasTipos.find(t => t.medio_pago === nombreCuenta);
+  if(tipo){
+    const t = String(tipo.tipo||'').toLowerCase();
+    if(t === 'crédito' || t === 'credito') return true;
+  }
+  return false;
+}
+
+/* Calcula saldo, ingresos y egresos de TODAS las (cuenta, moneda)
+   Devuelve estructura: { 'CuentaName|MONEDA': { cuenta, moneda, saldoTotal, ingresoPeriodo, egresoPeriodo } } */
+function calcularStatsPorCuentaMoneda(desde, hasta){
+  const stats = {};
+
+  /* Helper para asegurar que existe la entrada */
+  const k = (cuenta, moneda) => {
+    const key = cuenta + '|' + moneda;
+    if(!stats[key]) stats[key] = {
+      cuenta: cuenta, moneda: moneda,
+      saldoTotal: 0, ingresoPeriodo: 0, egresoPeriodo: 0
+    };
+    return stats[key];
+  };
+
+  /* Saldos iniciales como base del saldoTotal */
+  pnSaldosIniciales.forEach(s => {
+    const moneda = String(s.moneda||'ARS').toUpperCase();
+    k(s.cuenta, moneda).saldoTotal += parseFloat(s.saldo)||0;
+  });
+
+  /* Recorrer todas las filas */
+  allRows.forEach(r => {
+    const monto = parseFloat(r.monto)||0;
+    if(!monto) return;
+    const moneda = String(r.moneda||'ARS').toUpperCase();
+    const en = String(r.descripcion||'').trim();
+    const con = String(r.medio_pago||'').trim();
+    const fecha = r.fecha ? new Date(r.fecha) : null;
+    const enRango = fecha && desde && hasta ? (fecha >= desde && fecha <= hasta) : false;
+
+    /* CON: la plata sale de esta cuenta (resta saldo) */
+    if(con){
+      const e = k(con, moneda);
+      e.saldoTotal -= monto;
+      if(enRango) e.egresoPeriodo += monto;
+    }
+    /* EN: la plata entra a esta cuenta (suma saldo) */
+    if(en){
+      const e = k(en, moneda);
+      e.saldoTotal += monto;
+      if(enRango) e.ingresoPeriodo += monto;
+    }
+  });
+
+  return stats;
+}
+
+/* Calcula deuda neta de una tarjeta de crédito.
+   En tu modelo: cuando comprás, la tarjeta es CON (saldoTotal cae en negativo).
+   Cuando pagás, "Pago Visa" es EN sobre la tarjeta (saldoTotal sube hacia 0).
+   La deuda real = -saldoTotal (positivo si debés). */
+/* Calcula deuda neta de una tarjeta de crédito.
+   FIX 9c: combinar el registro de la tarjeta (donde están las compras como CON)
+   con el registro "Pago [Tarjeta]" (donde están los pagos como EN).
+   En tu modelo:
+   - Compra con tarjeta → CON = "Visa Santander" → resta saldo de "Visa Santander|MONEDA"
+   - Pago de tarjeta → EN = "Pago Visa Santander" → suma saldo de "Pago Visa Santander|MONEDA"
+   Hay que combinarlos para obtener la deuda neta real. */
+function calcularDeudaTarjeta(stats, nombreTarjeta){
+  const result = {};
+  const nombrePago = 'Pago ' + nombreTarjeta;
+
+  Object.keys(stats).forEach(key => {
+    const e = stats[key];
+    /* Caso 1: la entrada es la tarjeta misma (compras como CON) */
+    if(e.cuenta === nombreTarjeta){
+      if(!result[e.moneda]) result[e.moneda] = { saldo:0, pagosPeriodo:0, comprasPeriodo:0 };
+      /* saldoTotal aquí es negativo o 0: lo que llevás "consumido" sin saldar.
+         egresoPeriodo: compras del período (CON tarjeta)
+         ingresoPeriodo: si la tarjeta apareciera en EN — raro pero posible (ej. devolución) */
+      result[e.moneda].saldo += e.saldoTotal;
+      result[e.moneda].comprasPeriodo += e.egresoPeriodo;
+      /* Si hubo refund/devolución cargada como EN tarjeta, contar como reducción de compras */
+      result[e.moneda].comprasPeriodo -= e.ingresoPeriodo;
+    }
+    /* Caso 2: la entrada es "Pago [Tarjeta]" (los pagos hechos hacia la tarjeta) */
+    if(e.cuenta === nombrePago){
+      if(!result[e.moneda]) result[e.moneda] = { saldo:0, pagosPeriodo:0, comprasPeriodo:0 };
+      /* Cuando pagás la tarjeta, "Pago X" aparece como EN (suma saldo de "Pago X").
+         Eso refleja exactamente la cantidad pagada. */
+      result[e.moneda].saldo += e.saldoTotal;
+      result[e.moneda].pagosPeriodo += e.ingresoPeriodo;
+    }
+  });
+
+  return result; /* { 'ARS': {saldo, pagosPeriodo, comprasPeriodo}, ... } */
+}
+
+function renderPatrimonio(){
+  cargarSaldosIniciales().then(() => {
+    inicializarFiltrosPN();
+    _renderPatrimonioCore();
+  });
+}
+
+/* FIX 9d: refresca movimientos + saldos iniciales desde el Sheet, después re-renderiza */
+async function refrescarPN(){
+  showToast('Refrescando…');
+  await cargarSheet(); /* refresca allRows + tablasCuentas + tablasCategorias + tablasTipos */
+  await cargarSaldosIniciales(); /* refresca pnSaldosIniciales */
+  _renderPatrimonioCore();
+  showToast('✓ Patrimonio actualizado');
+}
+
+function _renderPatrimonioCore(){
+  const desde = document.getElementById('pn-desde').value;
+  const hasta = document.getElementById('pn-hasta').value;
+  const fechaDesde = desde ? new Date(desde + 'T00:00:00') : null;
+  const fechaHasta = hasta ? new Date(hasta + 'T23:59:59') : null;
+
+  const stats = calcularStatsPorCuentaMoneda(fechaDesde, fechaHasta);
+
+  /* Separar por bloque */
+  const liquido = [];
+  const inversiones = [];
+  const tarjetasUnicas = new Set();
+
+  Object.keys(stats).forEach(key => {
+    const e = stats[key];
+    const bloque = bloqueDeFila(e.cuenta, e.moneda);
+    if(bloque === null) return; /* No es cuenta real, descartar */
+    if(bloque === 'pasivo'){
+      tarjetasUnicas.add(e.cuenta);
+    } else if(bloque === 'inversion'){
+      inversiones.push(e);
+    } else if(bloque === 'liquido'){
+      liquido.push(e);
+    }
+  });
+
+  /* Filtrar líquido: solo monedas con saldo o movimiento del período */
+  const liquidoFiltrado = liquido.filter(e => Math.abs(e.saldoTotal) > 0.01 || e.ingresoPeriodo > 0 || e.egresoPeriodo > 0);
+  liquidoFiltrado.sort((a,b) => a.cuenta.localeCompare(b.cuenta) || a.moneda.localeCompare(b.moneda));
+
+  const inversionesFiltradas = inversiones.filter(e => Math.abs(e.saldoTotal) > 0.01 || e.ingresoPeriodo > 0 || e.egresoPeriodo > 0);
+  inversionesFiltradas.sort((a,b) => a.cuenta.localeCompare(b.cuenta) || a.moneda.localeCompare(b.moneda));
+
+  /* Renderizar bloques */
+  renderBloqueLiquido(liquidoFiltrado);
+  renderBloqueInversiones(inversionesFiltradas);
+  renderBloquePasivos(stats, tarjetasUnicas);
+
+  /* Resumen ejecutivo */
+  renderResumenPN(liquidoFiltrado, inversionesFiltradas, stats, tarjetasUnicas);
+}
+
+function renderBloqueLiquido(filas){
+  const wrap = document.getElementById('pn-bloque-liquido');
+  /* Agrupar por moneda */
+  const porMoneda = {};
+  filas.forEach(e => {
+    if(!porMoneda[e.moneda]) porMoneda[e.moneda] = [];
+    porMoneda[e.moneda].push(e);
+  });
+  /* Calcular total general en USD para el header del bloque */
+  let totalUSD = 0;
+  let warnTotal = false;
+  filas.forEach(e => {
+    const conv = convertirA(e.saldoTotal, e.moneda, 'USD');
+    if(conv === null) warnTotal = true;
+    else totalUSD += conv;
+  });
+  const totalTxt = warnTotal ? '<span class="pn-warn">⚠ parcial</span> USD ' + fmtNum(totalUSD) : 'USD ' + fmtNum(totalUSD);
+
+  if(filas.length === 0){
+    wrap.innerHTML = `<div class="pn-bloque">
+      <div class="pn-bloque-header">
+        <div class="pn-bloque-header-titulo">💧 Líquido</div>
+        <div class="pn-bloque-header-total">USD 0</div>
+      </div>
+      <div class="pn-empty">Sin movimientos</div>
+    </div>`;
+    return;
+  }
+
+  /* Una sub-tabla por moneda, ordenadas: ARS primero, USD después, resto alfabético */
+  const ordenMoneda = m => m === 'ARS' ? 0 : m === 'USD' ? 1 : 2;
+  const monedas = Object.keys(porMoneda).sort((a,b) => ordenMoneda(a) - ordenMoneda(b) || a.localeCompare(b));
+
+  const subTablasHTML = monedas.map(moneda => {
+    const filasM = porMoneda[moneda].sort((a,b) => a.cuenta.localeCompare(b.cuenta));
+    let subTotal = 0;
+    const filasHTML = filasM.map(e => {
+      subTotal += e.saldoTotal;
+      return `<tr>
+        <td>${esc(e.cuenta)}</td>
+        <td class="num up">${e.ingresoPeriodo > 0 ? fmtNum(e.ingresoPeriodo) : '0'}</td>
+        <td class="num bal">${fmtNum(e.saldoTotal)}</td>
+        <td class="num down">${e.egresoPeriodo > 0 ? fmtNum(e.egresoPeriodo) : '0'}</td>
+      </tr>`;
+    }).join('');
+    return `<div class="pn-subtabla">
+      <div class="pn-subtabla-header">
+        <div class="pn-subtabla-titulo">${moneda}</div>
+        <div class="pn-subtabla-total">${moneda} ${fmtNum(subTotal)}</div>
+      </div>
+      <div class="pn-tabla-wrap"><table class="pn-tabla">
+        <thead><tr>
+          <th>Cuenta</th>
+          <th class="num">Ingresos</th>
+          <th class="num">Saldo real</th>
+          <th class="num">Egresos</th>
+        </tr></thead>
+        <tbody>${filasHTML}</tbody>
+      </table></div>
+    </div>`;
+  }).join('');
+
+  wrap.innerHTML = `<div class="pn-bloque">
+    <div class="pn-bloque-header">
+      <div class="pn-bloque-header-titulo">💧 Líquido</div>
+      <div class="pn-bloque-header-total">${totalTxt}</div>
+    </div>
+    ${subTablasHTML}
+  </div>`;
+}
+
+function renderBloqueInversiones(filas){
+  const wrap = document.getElementById('pn-bloque-inversiones');
+  /* Agrupar por cuenta (Buenbit, Binance, Lemon, IOL) */
+  const porCuenta = {};
+  filas.forEach(e => {
+    if(!porCuenta[e.cuenta]) porCuenta[e.cuenta] = [];
+    porCuenta[e.cuenta].push(e);
+  });
+  /* Total general del bloque en USD */
+  let totalUSD = 0;
+  let warnTotal = false;
+  filas.forEach(e => {
+    const conv = convertirA(e.saldoTotal, e.moneda, 'USD');
+    if(conv === null) warnTotal = true;
+    else totalUSD += conv;
+  });
+  const totalTxt = warnTotal ? '<span class="pn-warn">⚠ parcial</span> USD ' + fmtNum(totalUSD) : 'USD ' + fmtNum(totalUSD);
+
+  if(filas.length === 0){
+    wrap.innerHTML = `<div class="pn-bloque">
+      <div class="pn-bloque-header">
+        <div class="pn-bloque-header-titulo">📈 Inversiones</div>
+        <div class="pn-bloque-header-total">USD 0</div>
+      </div>
+      <div class="pn-empty">Sin inversiones</div>
+    </div>`;
+    return;
+  }
+
+  /* Orden de cuentas: alfabético */
+  const cuentas = Object.keys(porCuenta).sort();
+  const subTablasHTML = cuentas.map(cuenta => {
+    const filasC = porCuenta[cuenta].sort((a,b) => a.moneda.localeCompare(b.moneda));
+    let subUSD = 0;
+    let warnSub = false;
+    const filasHTML = filasC.map(e => {
+      const saldoUSD = convertirA(e.saldoTotal, e.moneda, 'USD');
+      let saldoUsdTxt;
+      if(saldoUSD === null){
+        saldoUsdTxt = '<span class="pn-warn">⚠ N/A</span>';
+        warnSub = true;
+      } else {
+        saldoUsdTxt = fmtNum(saldoUSD);
+        subUSD += saldoUSD;
+      }
+      return `<tr>
+        <td>${esc(e.moneda)}</td>
+        <td class="num up">${e.ingresoPeriodo > 0 ? fmtNum(e.ingresoPeriodo) : '0'}</td>
+        <td class="num bal">${fmtNum(e.saldoTotal)}</td>
+        <td class="num bal">${saldoUsdTxt}</td>
+        <td class="num down">${e.egresoPeriodo > 0 ? fmtNum(e.egresoPeriodo) : '0'}</td>
+      </tr>`;
+    }).join('');
+    const subTotalTxt = warnSub ? '<span class="pn-warn">⚠ parcial</span> USD ' + fmtNum(subUSD) : 'USD ' + fmtNum(subUSD);
+    return `<div class="pn-subtabla">
+      <div class="pn-subtabla-header">
+        <div class="pn-subtabla-titulo">${esc(cuenta)}</div>
+        <div class="pn-subtabla-total">${subTotalTxt}</div>
+      </div>
+      <div class="pn-tabla-wrap"><table class="pn-tabla">
+        <thead><tr>
+          <th>Activo</th>
+          <th class="num">Ingresos</th>
+          <th class="num">Saldo</th>
+          <th class="num">Saldo USD</th>
+          <th class="num">Egresos</th>
+        </tr></thead>
+        <tbody>${filasHTML}</tbody>
+      </table></div>
+    </div>`;
+  }).join('');
+
+  wrap.innerHTML = `<div class="pn-bloque">
+    <div class="pn-bloque-header">
+      <div class="pn-bloque-header-titulo">📈 Inversiones</div>
+      <div class="pn-bloque-header-total">${totalTxt}</div>
+    </div>
+    ${subTablasHTML}
+  </div>`;
+}
+
+function renderBloquePasivos(stats, tarjetasUnicas){
+  const wrap = document.getElementById('pn-bloque-pasivos');
+
+  /* Para cada tarjeta, juntar sus monedas usando calcularDeudaTarjeta.
+     Después agruparlas por moneda para mostrar tabla por moneda. */
+  const porMoneda = {}; /* { 'ARS': [{tarjeta, saldo, pagos, compras}, ...], 'USD': [...] } */
+  Array.from(tarjetasUnicas).sort().forEach(tarjeta => {
+    const md = calcularDeudaTarjeta(stats, tarjeta);
+    Object.keys(md).forEach(moneda => {
+      if(!porMoneda[moneda]) porMoneda[moneda] = [];
+      porMoneda[moneda].push({
+        tarjeta: tarjeta,
+        saldo: md[moneda].saldo,
+        pagosPeriodo: md[moneda].pagosPeriodo,
+        comprasPeriodo: md[moneda].comprasPeriodo
+      });
+    });
+  });
+
+  /* Total general en USD */
+  let totalUSD = 0;
+  let warnTotal = false;
+  Object.keys(porMoneda).forEach(moneda => {
+    porMoneda[moneda].forEach(t => {
+      const conv = convertirA(t.saldo, moneda, 'USD');
+      if(conv === null) warnTotal = true;
+      else totalUSD += conv;
+    });
+  });
+  const totalTxt = warnTotal ? '<span class="pn-warn">⚠ parcial</span> USD ' + fmtNum(totalUSD) : 'USD ' + fmtNum(totalUSD);
+
+  if(tarjetasUnicas.size === 0 || Object.keys(porMoneda).length === 0){
+    wrap.innerHTML = `<div class="pn-bloque">
+      <div class="pn-bloque-header">
+        <div class="pn-bloque-header-titulo">💳 Pasivos (deuda)</div>
+        <div class="pn-bloque-header-total danger">USD 0</div>
+      </div>
+      <div class="pn-empty">Sin tarjetas</div>
+    </div>`;
+    return;
+  }
+
+  /* Orden ARS, USD, resto */
+  const ordenMoneda = m => m === 'ARS' ? 0 : m === 'USD' ? 1 : 2;
+  const monedas = Object.keys(porMoneda).sort((a,b) => ordenMoneda(a) - ordenMoneda(b) || a.localeCompare(b));
+
+  const subTablasHTML = monedas.map(moneda => {
+    const filasM = porMoneda[moneda].sort((a,b) => a.tarjeta.localeCompare(b.tarjeta));
+    let subSaldo = 0;
+    const filasHTML = filasM.map(t => {
+      subSaldo += t.saldo;
+      return `<tr>
+        <td>${esc(t.tarjeta)}</td>
+        <td class="num up">${fmtNum(t.pagosPeriodo)}</td>
+        <td class="num danger">${fmtNum(t.saldo)}</td>
+        <td class="num down">${fmtNum(t.comprasPeriodo)}</td>
+      </tr>`;
+    }).join('');
+    return `<div class="pn-subtabla">
+      <div class="pn-subtabla-header">
+        <div class="pn-subtabla-titulo">${moneda}</div>
+        <div class="pn-subtabla-total danger">${moneda} ${fmtNum(subSaldo)}</div>
+      </div>
+      <div class="pn-tabla-wrap"><table class="pn-tabla">
+        <thead><tr>
+          <th>Tarjeta</th>
+          <th class="num">Pagos</th>
+          <th class="num">Deuda real</th>
+          <th class="num">Compras</th>
+        </tr></thead>
+        <tbody>${filasHTML}</tbody>
+      </table></div>
+    </div>`;
+  }).join('');
+
+  wrap.innerHTML = `<div class="pn-bloque">
+    <div class="pn-bloque-header">
+      <div class="pn-bloque-header-titulo">💳 Pasivos (deuda)</div>
+      <div class="pn-bloque-header-total danger">${totalTxt}</div>
+    </div>
+    ${subTablasHTML}
+  </div>`;
+}
+
+function renderResumenPN(liquidoFiltrado, inversionesFiltradas, stats, tarjetasUnicas){
+  /* Subtotales en moneda elegida */
+  let subLiquido = 0, subInversionesUSD = 0, subDeuda = 0;
+  let subIngPeriodo = 0, subEgrPeriodo = 0;
+
+  liquidoFiltrado.forEach(e => {
+    const conv = convertirA(e.saldoTotal, e.moneda, pnMoneda);
+    if(conv !== null) subLiquido += conv;
+    /* Para flujos: convertimos también para mostrar suma uniforme */
+    const ing = convertirA(e.ingresoPeriodo, e.moneda, pnMoneda);
+    const egr = convertirA(e.egresoPeriodo, e.moneda, pnMoneda);
+    if(ing !== null) subIngPeriodo += ing;
+    if(egr !== null) subEgrPeriodo += egr;
+  });
+  inversionesFiltradas.forEach(e => {
+    const conv = convertirA(e.saldoTotal, e.moneda, 'USD');
+    if(conv !== null) subInversionesUSD += conv;
+  });
+  Array.from(tarjetasUnicas).forEach(tarjeta => {
+    const md = calcularDeudaTarjeta(stats, tarjeta);
+    Object.keys(md).forEach(moneda => {
+      const conv = convertirA(md[moneda].saldo, moneda, pnMoneda);
+      if(conv !== null) subDeuda += conv;
+    });
+  });
+
+  /* Inversiones está en USD; convertir a moneda elegida si es ARS */
+  const subInversiones = pnMoneda === 'USD' ? subInversionesUSD : convertirA(subInversionesUSD, 'USD', 'ARS');
+  const pnTotal = subLiquido + (subInversiones||0) + subDeuda; /* deuda viene negativa */
+
+  /* Total alt: si moneda elegida es ARS, mostrar también USD */
+  let pnTotalAlt = '';
+  if(pnMoneda === 'ARS'){
+    const enUSD = convertirA(pnTotal, 'ARS', 'USD');
+    pnTotalAlt = enUSD !== null ? `USD ${fmtNum(enUSD)}` : '';
+  } else {
+    const enARS = convertirA(pnTotal, 'USD', 'ARS');
+    pnTotalAlt = enARS !== null ? `ARS ${fmtNum(enARS)}` : '';
+  }
+
+  document.getElementById('pn-total').textContent = `${pnMoneda} ${fmtNum(pnTotal)}`;
+  document.getElementById('pn-total-alt').textContent = pnTotalAlt;
+  document.getElementById('pn-sub-liquido').textContent = fmtNum(subLiquido);
+  document.getElementById('pn-sub-inversiones').textContent = fmtNum(subInversiones||0);
+  document.getElementById('pn-sub-pasivos').textContent = fmtNum(subDeuda);
+  const neto = subIngPeriodo - subEgrPeriodo;
+  document.getElementById('pn-flujos').innerHTML =
+    `<span class="up">↑ ingresos ${fmtNum(subIngPeriodo)}</span> · <span class="down">↓ egresos ${fmtNum(subEgrPeriodo)}</span> · neto ${neto >= 0 ? '+' : ''}${fmtNum(neto)} en el período`;
+}
+
+/* ════════════════════════════════════════════════════════
+   FIX 8 — Sub-tabs de Config + Clasificar pendientes + Regenerar tablas
+   ════════════════════════════════════════════════════════ */
+
+const SUBTABS = ['conexion','pendientes','tasas','mantenimiento'];
+
+function showSubtab(id){
+  SUBTABS.forEach(t => {
+    document.getElementById('subpanel-'+t)?.classList.toggle('active', t===id);
+    document.getElementById('subtab-'+t)?.classList.toggle('active', t===id);
+  });
+  if(id==='pendientes') cargarPendientes();
+}
+
+let _pendientesCache = []; /* {en, count, monto_ars, monto_usd, categoria_actual} */
+let _pendientesCambios = {}; /* en -> nueva categoria */
+
+async function cargarPendientes(){
+  const url = config.scriptUrl;
+  if(!url){ showToast('Configurá la URL del Script en Conexión'); return; }
+  const summary = document.getElementById('pend-summary');
+  const list = document.getElementById('pend-list');
+  const btn = document.getElementById('btn-guardar-pendientes');
+  summary.textContent = 'Cargando…';
+  list.innerHTML = '';
+  btn.style.display = 'none';
+  _pendientesCambios = {};
+  try{
+    const r = await fetch(url + '?action=pendientes');
+    const d = await r.json();
+    if(d.status !== 'ok'){ summary.textContent = 'Error al cargar: ' + (d.message||'?'); return; }
+    _pendientesCache = d.rows || [];
+    if(_pendientesCache.length === 0){
+      summary.textContent = '';
+      list.innerHTML = '<div class="pend-empty">🎉 No hay destinos sin clasificar</div>';
+      return;
+    }
+    const totalTrx = _pendientesCache.reduce((s,p) => s + p.count, 0);
+    summary.innerHTML = `<b>${_pendientesCache.length}</b> destinos sin categoría · <b>${totalTrx}</b> transacciones afectadas. Asigná una categoría y se aplicará a todas las filas con ese destino.`;
+    renderPendientesList();
+    btn.style.display = 'block';
+  }catch(e){
+    console.error(e);
+    summary.textContent = 'Error de conexión';
+  }
+}
+
+function renderPendientesList(){
+  const list = document.getElementById('pend-list');
+  /* Categorías disponibles desde tablasCategorias, descartando los valores "pendientes" */
+  const catsBlacklist = new Set(['', 'TBD', 'Varios / TBD', 'Cuenta Balance']);
+  const cats = [...new Set(tablasCategorias.map(c => c.categoria).filter(c => c && !catsBlacklist.has(c)))].sort();
+  if(cats.length === 0){
+    list.innerHTML = '<div class="pend-empty">No hay categorías cargadas. Agregá categorías a algún EN primero.</div>';
+    return;
+  }
+  list.innerHTML = _pendientesCache.map((p, idx) => {
+    const opciones = ['<option value="">— Elegir —</option>']
+      .concat(cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`))
+      .join('');
+    const montoTxt = p.monto_ars > 0 ? `${fmtNum(p.monto_ars)} ARS` : '';
+    const montoUsdTxt = p.monto_usd > 0 ? `${fmtNum(p.monto_usd)} USD` : '';
+    const montoFinal = [montoTxt, montoUsdTxt].filter(x=>x).join(' · ');
+    return `
+      <div class="pend-row">
+        <div class="pend-info">
+          <div class="pend-name">${esc(p.en)}</div>
+          <div class="pend-stats">${p.count} trx${montoFinal ? ' · ' + montoFinal : ''}</div>
+        </div>
+        <select class="pend-select" data-en="${esc(p.en)}" onchange="onPendienteChange(this)">
+          ${opciones}
+        </select>
+      </div>`;
+  }).join('');
+}
+
+function onPendienteChange(sel){
+  const en = sel.dataset.en;
+  const cat = sel.value;
+  if(cat){
+    _pendientesCambios[en] = cat;
+    sel.classList.add('changed');
+  } else {
+    delete _pendientesCambios[en];
+    sel.classList.remove('changed');
+  }
+  /* Actualizar contador en el botón */
+  const n = Object.keys(_pendientesCambios).length;
+  const btn = document.getElementById('btn-guardar-pendientes');
+  btn.textContent = n > 0 ? `Guardar ${n} clasificación${n>1?'es':''}` : 'Guardar clasificaciones';
+  btn.disabled = n === 0;
+}
+
+let _pendientesPendingPropagacion = null;
+
+async function guardarPendientes(){
+  const url = config.scriptUrl;
+  if(!url) return;
+  const ens = Object.keys(_pendientesCambios);
+  if(ens.length === 0){ showToast('No hay cambios para guardar'); return; }
+  /* Pedir contador de propagación al backend */
+  showToast('Calculando impacto…');
+  try{
+    const data = encodeURIComponent(JSON.stringify(ens));
+    const r = await fetch(url + '?action=contarPropagacion&data=' + data);
+    const d = await r.json();
+    if(d.status !== 'ok'){ showToast('Error al contar: ' + (d.message||'?')); return; }
+    /* Mostrar modal de confirmación */
+    mostrarModalPropagacion(ens.length, d.count);
+  }catch(e){
+    console.error(e);
+    showToast('Error de conexión');
+  }
+}
+
+function mostrarModalPropagacion(ensCount, filasCount){
+  const det = document.getElementById('modal-prop-detail');
+  const cambiosHTML = Object.keys(_pendientesCambios).slice(0, 5).map(en =>
+    `<div class="modal-detail-row"><span class="modal-detail-label">${esc(en)}</span><span class="modal-detail-value">${esc(_pendientesCambios[en])}</span></div>`
+  ).join('');
+  const masTxt = ensCount > 5 ? `<div class="modal-detail-row"><span class="modal-detail-label">+ ${ensCount - 5} más…</span><span class="modal-detail-value"></span></div>` : '';
+  det.innerHTML = cambiosHTML + masTxt;
+  document.getElementById('modal-prop-mensaje').innerHTML =
+    `Vas a clasificar <b>${ensCount} destino${ensCount>1?'s':''}</b>. Esto va a actualizar la categoría de <b>${filasCount} transacciones históricas</b>. ¿Continuar?`;
+  document.getElementById('modal-propagacion').classList.add('active');
+}
+
+function cancelarPropagacion(){
+  document.getElementById('modal-propagacion').classList.remove('active');
+}
+
+async function confirmarPropagacion(){
+  document.getElementById('modal-propagacion').classList.remove('active');
+  const url = config.scriptUrl;
+  const updates = Object.keys(_pendientesCambios).map(en => ({ en: en, categoria: _pendientesCambios[en] }));
+  const btn = document.getElementById('btn-guardar-pendientes');
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+  try{
+    const data = encodeURIComponent(JSON.stringify(updates));
+    const r = await fetch(url + '?action=updateCategorias&data=' + data);
+    const d = await r.json();
+    if(d.status === 'ok'){
+      showToast(`✓ ${d.cats_actualizadas} categorías · ${d.movimientos_actualizados} filas`);
+      _pendientesCambios = {};
+      /* Refrescar todo */
+      await cargarSheet();
+      cargarPendientes();
+    } else {
+      showToast('Error: ' + (d.message||'?'));
+      btn.disabled = false;
+    }
+  }catch(e){
+    console.error(e);
+    showToast('Error de conexión');
+    btn.disabled = false;
+  }
+}
+
+async function regenerarTablas(){
+  const url = config.scriptUrl;
+  if(!url){ showToast('Configurá la URL del Script'); return; }
+  const btn = document.getElementById('btn-regenerar');
+  const result = document.getElementById('regenerar-result');
+  btn.disabled = true;
+  btn.textContent = '⏳ Procesando… (puede tardar 10-30s)';
+  result.textContent = '';
+  try{
+    const r = await fetch(url + '?action=regenerarTablas');
+    const d = await r.json();
+    if(d.status === 'ok'){
+      const res = d.result || {};
+      result.innerHTML = `✓ Listo: ${res.cuentas||0} cuentas · ${res.categorias||0} categorías · ${res.tipos||0} tipos`;
+      showToast('Tablas regeneradas ✓');
+      await cargarSheet();
+    } else {
+      result.textContent = 'Error: ' + (d.message||'?');
+    }
+  }catch(e){
+    console.error(e);
+    result.textContent = 'Error de conexión';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚙️ Regenerar tablas de referencia';
+  }
+}
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
